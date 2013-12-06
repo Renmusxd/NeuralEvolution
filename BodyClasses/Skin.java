@@ -4,6 +4,8 @@
  */
 package NeuralEvolution.BodyClasses;
 
+import NeuralEvolution.NeuronClasses.NeuralNode;
+
 /**
  *
  * @author Sumner
@@ -22,6 +24,8 @@ public class Skin extends BodyPart {
     private static final int DAMAGE_RESIST = 5;
     private static final int TOXIN_REMOVE_RATE = 0;
     private static final boolean NEURAL_CENTER = false;
+    
+    private NeuralNode painNode;
     public Skin(){
         super();
         this.setName(NAME);
@@ -34,5 +38,13 @@ public class Skin extends BodyPart {
         this.setRehealRate(REHEAL_RATE);
         this.setSightDistance(SIGHT_DISTANCE);
         this.setWalkingBonus(WALKING_BONUS);
+        
+        painNode = new NeuralNode(false,false);
+        this.nodeList.add(painNode);
+    }
+    
+    @Override
+    public void updateNodes(){
+        
     }
 }

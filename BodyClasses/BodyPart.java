@@ -4,6 +4,9 @@
  */
 package NeuralEvolution.BodyClasses;
 
+import NeuralEvolution.NeuronClasses.NeuralNode;
+import java.util.ArrayList;
+
 /**
  *
  * @author Sumner
@@ -24,6 +27,7 @@ public class BodyPart {
             
     private boolean neuralCenter;
     private String name;
+    public ArrayList<NeuralNode> nodeList;
     
     public BodyPart(){
         this.name = "Body Part";
@@ -39,8 +43,13 @@ public class BodyPart {
         this.muscleDensity = 0;
         this.damageResist = 0;
         this.toxinRemovalRate = 0;
+        this.nodeList = new ArrayList<NeuralNode>();
     }
 
+    public void updateNodes(){
+        
+    }
+    
     public int getWalkingBonus() {
         return walkingBonus;
     }
