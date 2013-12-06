@@ -4,10 +4,12 @@
  */
 package neuralevolution.NeuralEvolution;
 
+import javax.swing.JFrame;
+
 /**
  *
  * @author Sumner
  */
-public class BodyWindow {
+public class BodyWindow extends JFrame {
     
 }
