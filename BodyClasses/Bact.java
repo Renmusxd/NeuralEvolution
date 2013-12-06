@@ -4,9 +4,9 @@
  */
 package BodyClasses;
 
-import java.awt.Graphics2D;
 import NeuronClasses.NeuralNetworkManager;
 import NeuronClasses.NeuralNode;
+import java.awt.Graphics2D;
 
 /**
  *

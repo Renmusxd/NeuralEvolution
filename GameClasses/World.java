@@ -1,5 +1,6 @@
 package GameClasses;
 
+import BodyClasses.Bact;
 import BodyClasses.Map;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -11,7 +12,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import BodyClasses.Bact;
 
 public class World implements Updatable, Drawable, KeyListener, MouseListener, ComponentListener { // The main world for objects to roam free
 
