@@ -23,6 +23,16 @@ public class Brain extends BodyPart{
     private static final int TOXIN_REMOVE_RATE = 0;
     private static final boolean NEURAL_CENTER = true;
     public Brain(){
-        super(NAME,WALKING_BONUS,BLOOD_CONSUMPTION_COEF,BLOOD_PRODUCTION,BLOOD_VOLUME,AIRATION_RATE,REHEAL_RATE,DIGESTION_RATE,SIGHT_DISTANCE,MUSCLE_DENSITY,DAMAGE_RESIST,TOXIN_REMOVE_RATE,NEURAL_CENTER);
+        super();
+        this.setName(NAME);
+        this.setAirationRate(AIRATION_RATE);
+        this.setBloodUsage(BLOOD_CONSUMPTION_COEF);
+        this.setBloodProduction(BLOOD_PRODUCTION);
+        this.setBloodVolume(BLOOD_VOLUME);
+        this.setDigestionRate(DIGESTION_RATE);
+        this.setNeuralCenter(NEURAL_CENTER);
+        this.setRehealRate(REHEAL_RATE);
+        this.setSightDistance(SIGHT_DISTANCE);
+        this.setWalkingBonus(WALKING_BONUS);
     }
 }

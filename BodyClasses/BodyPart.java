@@ -25,20 +25,20 @@ public class BodyPart {
     private boolean neuralCenter;
     private String name;
     
-    public BodyPart(String name,int walkingBonus,int bloodConsumptionCoef,int bloodProduction,int bloodVolume,int airationRate,int rehealRate,int digestionRate,int sightDistance,int muscleDensity,int damageResist,int toxinRemovalRate,boolean neuralCenter){
-        this.name = name;
-        this.walkingBonus = walkingBonus;
-        this.bloodConsumptionCoef = bloodConsumptionCoef;
-        this.bloodProduction = bloodProduction;
-        this.bloodVolume = bloodVolume;
-        this.airationRate = airationRate;
-        this.rehealRate = rehealRate;
-        this.digestionRate = digestionRate;
-        this.sightDistance = sightDistance;
-        this.neuralCenter = neuralCenter;
-        this.muscleDensity = muscleDensity;
-        this.damageResist = damageResist;
-        this.toxinRemovalRate = toxinRemovalRate;
+    public BodyPart(){
+        this.name = "Body Part";
+        this.walkingBonus = 0;
+        this.bloodConsumptionCoef = 0;
+        this.bloodProduction = 0;
+        this.bloodVolume = 0;
+        this.airationRate = 0;
+        this.rehealRate = 0;
+        this.digestionRate = 0;
+        this.sightDistance = 0;
+        this.neuralCenter = false;
+        this.muscleDensity = 0;
+        this.damageResist = 0;
+        this.toxinRemovalRate = 0;
     }
 
     public int getWalkingBonus() {
