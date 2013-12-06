@@ -1,4 +1,4 @@
-package neuralevolution.NeuralEvolution;
+package neuralevolution.NeuralEvolution.GameClasses;
 
 public class Workhorse {
 

@@ -1,4 +1,4 @@
-package neuralevolution.NeuralEvolution;
+package neuralevolution.NeuralEvolution.GameClasses;
 
 import java.awt.Canvas;
 import java.awt.Color;

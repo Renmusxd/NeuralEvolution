@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package neuralevolution.NeuralEvolution;
+package neuralevolution.NeuralEvolution.organs;
 
 import java.awt.Graphics2D;
+import neuralevolution.NeuralEvolution.GameClasses.Drawable;
 
 /**
  *

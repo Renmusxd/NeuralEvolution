@@ -1,5 +1,6 @@
-package neuralevolution.NeuralEvolution;
+package neuralevolution.NeuralEvolution.GameClasses;
 
+import neuralevolution.NeuralEvolution.organs.Map;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -10,6 +11,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import neuralevolution.NeuralEvolution.Bact;
 
 public class World implements Updatable, Drawable, KeyListener, MouseListener, ComponentListener { // The main world for objects to roam free
 

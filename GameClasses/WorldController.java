@@ -1,4 +1,4 @@
-package neuralevolution.NeuralEvolution;
+package neuralevolution.NeuralEvolution.GameClasses;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
