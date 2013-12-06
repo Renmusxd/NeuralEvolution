@@ -39,6 +39,7 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
 		WindowWidth = myWorldController.getGameWindow().WIDTH;
 		WindowHeight = myWorldController.getGameWindow().HEIGHT;
                 
+                myMap = new Map(0,0);
                 bactArray = new ArrayList<Bact>();
                 bactRemoveArray = new ArrayList<Bact>();
 	}
@@ -49,7 +50,7 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
                     g.setColor(Color.black);
                     g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
                     g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
-                    if (this.myWorldController.paused){
+                    if (this.paused){
                             g.setColor(Color.red);
                             g.drawString("PAUSED", WindowWidth - 50, 10);
                     }
