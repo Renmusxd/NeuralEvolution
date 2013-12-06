@@ -1,4 +1,4 @@
-package GameClasses;
+package NeuralEvolution.GameClasses;
 
 import BodyClasses.Bact;
 import BodyClasses.Map;
