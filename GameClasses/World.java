@@ -20,9 +20,12 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
         private boolean paused;
         private boolean debug = true;
 	private Map myMap;
+        private ArrayList<Bact> bactAddArray;
         private ArrayList<Bact> bactArray;
         private ArrayList<Bact> bactRemoveArray;
-        
+        private ArrayList<Bact> bactDrawAddArray;
+        private ArrayList<Bact> bactDrawArray;
+        private ArrayList<Bact> bactDrawRemoveArray;
 	private int WindowWidth;
 	private int WindowHeight;
         
@@ -40,29 +43,39 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
 		WindowHeight = myWorldController.getGameWindow().HEIGHT;
                 
                 myMap = new Map(0,0);
+                bactAddArray = new ArrayList<Bact>();
                 bactArray = new ArrayList<Bact>();
                 bactRemoveArray = new ArrayList<Bact>();
+                bactDrawAddArray = new ArrayList<Bact>();
+                bactDrawArray = new ArrayList<Bact>();
+                bactDrawRemoveArray = new ArrayList<Bact>();
+                
+                this.addBact(new Bact());
 	}
 
 	@Override
 	public void draw(Graphics2D g) { // please keep in mind this can be multithreaded with the updates, disable if needed
-		if (this.debug){
-                    g.setColor(Color.black);
-                    g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
-                    g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
-                    if (this.paused){
-                            g.setColor(Color.red);
-                            g.drawString("PAUSED", WindowWidth - 50, 10);
-                    }
-                }
                 myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
-                for (Bact b : bactArray){
+                for (Bact b : bactDrawArray){
                     /**
                      * If bacteria is at all visible, draw it, else don't
                      * tell the bacteria where to draw with: b.draw(g,xoffset,yoffset);
                      */
                     if (true){
                         b.draw(g,this.view_Xoffset, this.view_Yoffset);
+                    }
+                }
+                this.bactDrawArray.addAll(this.bactDrawAddArray);
+                this.bactDrawAddArray.clear();
+                this.bactDrawArray.removeAll(this.bactDrawRemoveArray);
+                this.bactDrawRemoveArray.clear();
+                if (this.debug){
+                    g.setColor(Color.black);
+                    g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
+                    g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
+                    if (this.paused){
+                            g.setColor(Color.red);
+                            g.drawString("PAUSED", WindowWidth - 50, 10);
                     }
                 }
 	}
@@ -73,12 +86,20 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
                     b.update();
                     if (!b.isAlive()){bactRemoveArray.add(b);}
                 }
-                bactArray.removeAll(this.bactRemoveArray);
+                this.bactArray.addAll(this.bactAddArray);
+                this.bactAddArray.clear();
+                this.bactArray.removeAll(this.bactRemoveArray);
                 this.bactRemoveArray.clear();
 	}
 	
-        public void addBact(Bact b){}
-        public void removeBact(Bact b){}
+        public void addBact(Bact b){
+            this.bactAddArray.add(b);
+            this.bactDrawAddArray.add(b);
+        }
+        public void removeBact(Bact b){
+            this.bactRemoveArray.add(b);
+            this.bactDrawRemoveArray.add(b);
+        }
         
 	// -------------------------------------------------------------------- KEYBOARD, COMPONENT, AND MOUSE EVENTS -------------------------------------------------
 	@Override

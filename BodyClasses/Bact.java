@@ -6,6 +6,7 @@ package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
 import NeuralEvolution.NeuronClasses.NeuralNode;
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
@@ -32,6 +33,7 @@ public class Bact {
     
     public Bact(){
         //Init with random DNA
+        this("ABCD");
     }
     public Bact(String DNA){
         nnm = new NeuralNetworkManager();
@@ -55,6 +57,7 @@ public class Bact {
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
-        
+        g.setColor(Color.BLACK);
+        g.drawOval(100, 100, 10, 10);
     }
 }
