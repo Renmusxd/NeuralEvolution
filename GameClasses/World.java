@@ -1,7 +1,7 @@
 package NeuralEvolution.GameClasses;
 
-import BodyClasses.Bact;
-import BodyClasses.Map;
+import NeuralEvolution.BodyClasses.Bact;
+import NeuralEvolution.BodyClasses.Map;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;

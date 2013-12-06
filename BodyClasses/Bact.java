@@ -4,8 +4,8 @@
  */
 package NeuralEvolution.BodyClasses;
 
-import NeuronClasses.NeuralNetworkManager;
-import NeuronClasses.NeuralNode;
+import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
+import NeuralEvolution.NeuronClasses.NeuralNode;
 import java.awt.Graphics2D;
 
 /**

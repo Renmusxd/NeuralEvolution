@@ -4,7 +4,7 @@
  */
 package NeuralEvolution.BodyClasses;
 
-import GameClasses.Drawable;
+import NeuralEvolution.GameClasses.Drawable;
 import java.awt.Graphics2D;
 
 /**
