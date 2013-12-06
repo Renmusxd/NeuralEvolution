@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package NeuralEvolution.BodyClasses;
+package NeuralEvolution.SpecificGameClasses;
 
 import NeuralEvolution.GameClasses.Drawable;
 import java.awt.Graphics2D;
