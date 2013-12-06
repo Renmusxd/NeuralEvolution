@@ -10,7 +10,7 @@ package NeuralEvolution.BodyClasses;
  */
 public class Brain extends BodyPart{
     private static final String NAME = "Brain";
-    private static final int WALKING_BONUS = 1;
+    private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 10;
     private static final int BLOOD_PRODUCTION = 0;
     private static final int BLOOD_VOLUME = 0;
@@ -25,14 +25,9 @@ public class Brain extends BodyPart{
     public Brain(){
         super();
         this.setName(NAME);
-        this.setAirationRate(AIRATION_RATE);
-        this.setBloodUsage(BLOOD_CONSUMPTION_COEF);
-        this.setBloodProduction(BLOOD_PRODUCTION);
-        this.setBloodVolume(BLOOD_VOLUME);
-        this.setDigestionRate(DIGESTION_RATE);
+        this.setBloodConsumptionCoef(BLOOD_CONSUMPTION_COEF);
         this.setNeuralCenter(NEURAL_CENTER);
         this.setRehealRate(REHEAL_RATE);
-        this.setSightDistance(SIGHT_DISTANCE);
-        this.setWalkingBonus(WALKING_BONUS);
+        this.setDamageResist(DAMAGE_RESIST);
     }
 }

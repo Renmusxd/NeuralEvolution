@@ -26,13 +26,8 @@ public class Lung extends BodyPart{
         super();
         this.setName(NAME);
         this.setAirationRate(AIRATION_RATE);
-        this.setBloodUsage(BLOOD_CONSUMPTION_COEF);
-        this.setBloodProduction(BLOOD_PRODUCTION);
-        this.setBloodVolume(BLOOD_VOLUME);
-        this.setDigestionRate(DIGESTION_RATE);
-        this.setNeuralCenter(NEURAL_CENTER);
+        this.setBloodConsumptionCoef(BLOOD_CONSUMPTION_COEF);
         this.setRehealRate(REHEAL_RATE);
-        this.setSightDistance(SIGHT_DISTANCE);
-        this.setWalkingBonus(WALKING_BONUS);
+        this.setDamageResist(DAMAGE_RESIST);
     }
 }

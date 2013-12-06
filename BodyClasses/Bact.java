@@ -19,10 +19,6 @@ public class Bact {
     
     private NeuralNetworkManager nnm;
     
-    // Output nodes (feed into neurons)
-    private NeuralNode hungerNode, sevInjuryNode, dangerNode, painFrontNode, painLeftNode, painBackNode, painRightNode, sightRedLeftNode,
-                       sightGreenLeftNode, sightBlueLeftNode, sightRedMidNode, sightGreenMidNode, sightBlueMidNode, sightRedRightNode,
-                       sightGreenRightNode, sightBlueRightNode, objectCloseNode;
     // input nodes (operate bact based on neurons)
     private NeuralNode moveForwardNode, turnLeftNode, turnRightNode, attackNode, spitNode, eatNode;
    
