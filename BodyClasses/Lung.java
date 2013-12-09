@@ -10,6 +10,7 @@ package NeuralEvolution.BodyClasses;
  */
 public class Lung extends BodyPart{
     private static final String NAME = "Lung";
+    private static final int SIZE = 6000;
     private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 3;
     private static final int BLOOD_PRODUCTION = 0;

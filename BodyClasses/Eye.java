@@ -12,6 +12,7 @@ import NeuralEvolution.NeuronClasses.NeuralNode;
  */
 public class Eye extends BodyPart{
     private static final String NAME = "Eye";
+    private static final int SIZE = 6; // Cubic centimeters
     private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 1;
     private static final int BLOOD_PRODUCTION = 0;
@@ -51,6 +52,6 @@ public class Eye extends BodyPart{
     
     @Override
     public void updateNodes(){
-        
+        // TODO
     }
 }

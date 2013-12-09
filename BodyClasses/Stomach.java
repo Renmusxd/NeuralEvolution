@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class Stomach extends BodyPart{
     private static final String NAME = "Stomach";
+    private static final int SIZE = 2000; // Cubic centimeters
     private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 1;
     private static final int BLOOD_PRODUCTION = 0;
@@ -37,7 +38,7 @@ public class Stomach extends BodyPart{
         this.setRehealRate(REHEAL_RATE);
         this.setToxinRemovalRate(TOXIN_REMOVE_RATE);
         
-        hungerNode = new NeuralNode(false,false);
+        hungerNode = new NeuralNode(NeuralNode.OR_OPERATION,false);
         this.nodeList.add(hungerNode);
     }
     

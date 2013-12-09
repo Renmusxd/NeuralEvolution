@@ -10,6 +10,7 @@ package NeuralEvolution.BodyClasses;
  */
 public class Heart extends BodyPart{
     private static final String NAME = "Heart";
+    private static final int SIZE = 280;
     private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 1;
     private static final int BLOOD_PRODUCTION = 0;

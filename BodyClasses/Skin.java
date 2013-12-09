@@ -12,6 +12,7 @@ import NeuralEvolution.NeuronClasses.NeuralNode;
  */
 public class Skin extends BodyPart {
     private static final String NAME = "Skin";
+    private static final int SIZE = 0; // special
     private static final int WALKING_BONUS = 0;
     private static final int BLOOD_CONSUMPTION_COEF = 1;
     private static final int BLOOD_PRODUCTION = 0;
