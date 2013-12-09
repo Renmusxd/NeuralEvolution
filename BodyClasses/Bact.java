@@ -5,6 +5,7 @@
 package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
+import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -27,23 +28,23 @@ public class Bact {
     //Traits
     private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency, muscleDensity;
     
-    private int x_pos, y_pos; //10 to 1 for pixels to preserve ints
+    private Movement pos;
     
     private float maxBloodVolume; //calculated from sum of hearts and such
     private float totalBloodVolume;
     
     
-    public Bact(){
-        //Init with random DNA
-        this("ABCD");
+    public Bact(int x, int y, int theta){
+        this(x,y,theta,Bact.randomDNA());
     }
-    public Bact(String DNA){
+    public Bact(int x, int y, int theta,String DNA){
         nnm = new NeuralNetworkManager();
         body = new BodyGraph(new Brain());
         //Parse DNA
         this.parseDNA(DNA);
         nnm.parseDNA(DNA);
         body.parseDNA(DNA);
+        pos = new Movement(x,y,theta);
     }
     
     public void update(){
@@ -62,6 +63,7 @@ public class Bact {
         
     }
     
-    public int getX(){return this.x_pos;}
-    public int getY(){return this.y_pos;}
+    public static String randomDNA(){
+        return null;
+    }
 }

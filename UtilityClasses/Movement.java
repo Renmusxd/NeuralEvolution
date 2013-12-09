@@ -15,7 +15,11 @@ public class Movement {
         this.y = y;
         this.theta = theta;
     }
-
+    public void add(Movement m){
+        this.x+=m.getX();
+        this.y+=m.getY();
+        this.theta+=m.getTheta();
+    }
     public int getX() {
         return x;
     }

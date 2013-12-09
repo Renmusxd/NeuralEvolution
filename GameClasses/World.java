@@ -50,7 +50,7 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
                 bactDrawArray = new ArrayList<Bact>();
                 bactDrawRemoveArray = new ArrayList<Bact>();
                 
-                this.addBact(new Bact());
+                this.addBact(new Bact(100,100,0));
 	}
 
 	@Override
