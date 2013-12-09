@@ -55,7 +55,7 @@ public class Bact {
         return false;
     }
     
-    public void parseDNA(String DNA){
+    private void parseDNA(String DNA){
         //Picks appropriate DNA segments and sets traits
     }
     
