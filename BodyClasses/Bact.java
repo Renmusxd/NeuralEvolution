@@ -15,6 +15,8 @@ import java.awt.Graphics2D;
  */
 public class Bact {
     
+    private final String ALPHABET = "ABCD";
+    
     private final static int DEFAULT_DNA_LENGTH = 100;
     
     private NeuralNetworkManager nnm;
@@ -33,7 +35,7 @@ public class Bact {
     }
     public Bact(String DNA){
         nnm = new NeuralNetworkManager();
-        body = new BodyGraph();
+        body = new BodyGraph(new Brain());
         //Parse DNA
         this.parseDNA(DNA);
         nnm.parseDNA(DNA);
