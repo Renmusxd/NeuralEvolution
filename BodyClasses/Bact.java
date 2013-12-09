@@ -5,7 +5,6 @@
 package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
-import NeuralEvolution.NeuronClasses.NeuralNode;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -14,20 +13,25 @@ import java.awt.Graphics2D;
  * @author Sumner
  */
 public class Bact {
-    
-    private final String ALPHABET = "ABCD";
+    /*
+     * TODO get sexual reproduction integrated, we'll start with asexual.
+     */
+    public static final String ALPHABET = "ABCD";
+    //public static final String DNA_INITIALIZAER = "AAAA";
     
     private final static int DEFAULT_DNA_LENGTH = 100;
     
     private NeuralNetworkManager nnm;
     
-    // input nodes (operate bact based on neurons)
-    private NeuralNode moveForwardNode, turnLeftNode, turnRightNode, attackNode, spitNode, eatNode;
-   
-    //TODO get sexual reproduction integrated, we'll start with asexual.
     private BodyGraph body;
     //Traits
     private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency, muscleDensity;
+    
+    private int x_pos, y_pos; //10 to 1 for pixels to preserve ints
+    
+    private float maxBloodVolume; //calculated from sum of hearts and such
+    private float totalBloodVolume;
+    
     
     public Bact(){
         //Init with random DNA
@@ -43,7 +47,7 @@ public class Bact {
     }
     
     public void update(){
-        
+        // TODO
     }
     
     public boolean isAlive(){
@@ -55,7 +59,9 @@ public class Bact {
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
-        g.setColor(Color.BLACK);
-        g.drawOval(100, 100, 10, 10);
+        
     }
+    
+    public int getX(){return this.x_pos;}
+    public int getY(){return this.y_pos;}
 }
