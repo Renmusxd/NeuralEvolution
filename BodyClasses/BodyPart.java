@@ -24,6 +24,8 @@ public class BodyPart {
     public static final int MAX_HEALTH = 100;
     
     private int health = MAX_HEALTH;
+    
+    private int size;
     private int walkingBonus, bloodConsumptionCoef, bloodProduction, bloodVolume, airationRate,
                 rehealRate, digestionRate, sightDistance, muscleDensity, damageResist,
                 toxinRemovalRate;
@@ -34,6 +36,7 @@ public class BodyPart {
     
     public BodyPart(){
         this.name = "Body Part";
+        this.size = 0;
         this.walkingBonus = 0;
         this.bloodConsumptionCoef = 0;
         this.bloodProduction = 0;
@@ -182,6 +185,12 @@ public class BodyPart {
     public void setNodeList(ArrayList<NeuralNode> nodeList) {
         this.nodeList = nodeList;
     }
-    
-    
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }
