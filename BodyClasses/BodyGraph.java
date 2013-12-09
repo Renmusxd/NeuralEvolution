@@ -19,14 +19,21 @@ class BodyGraph {
      * 
      * Make sure there are no loops
      */
+    private BodyPartNode startingNode;
     
-    
-    public BodyGraph(){
-        
+    public BodyGraph(Brain startingBrain){
+        this(new BodyPartNode(startingBrain));
+    }
+    public BodyGraph(BodyPartNode bpn){
+        if (bpn.getBodyPart() instanceof Brain){
+            startingNode = bpn;
+        } else {
+            throw new Error("Brains needed");
+        }
     }
     
     
     public void parseDNA(String DNA) {
-    
+        //TODO
     }
 }
