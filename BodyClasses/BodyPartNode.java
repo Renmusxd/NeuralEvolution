@@ -4,6 +4,7 @@
  */
 package NeuralEvolution.BodyClasses;
 
+import java.util.ArrayList;
 /**
  *
  * @author Sumner
@@ -11,18 +12,18 @@ package NeuralEvolution.BodyClasses;
 public class BodyPartNode {
     
     private BodyPart bp;
-    private BodyPartNode previousNode = null;
-    private BodyPartNode nextNode = null;
+    private ArrayList<BodyPartNode> previousNodes = null;
+    private ArrayList<BodyPartNode> nextNodes = null;
     
     
     public BodyPartNode(BodyPart bp){
         this.bp = bp;
     }
     
-    public BodyPartNode getNext(){return this.nextNode;}
-    public void setNext(BodyPartNode bpn){this.nextNode = bpn;}
-    public BodyPartNode getPrevious(){return this.previousNode;}
-    public void setPrevious(BodyPartNode bpn){this.previousNode = bpn;}
+    public BodyPartNode[] getNext(){return this.nextNodes.toArray(new BodyPartNode[0]);}
+    public void setNext(BodyPartNode bpn){this.nextNodes.add(bpn);}
+    public BodyPartNode[] getPrevious(){return this.nextNodes.toArray(new BodyPartNode[0]);}
+    public void setPrevious(BodyPartNode bpn){this.previousNodes.add(bpn);}
     public BodyPart getBodyPart(){return bp;}
     
 }
