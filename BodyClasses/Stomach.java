@@ -4,6 +4,9 @@
  */
 package NeuralEvolution.BodyClasses;
 
+import NeuralEvolution.NeuronClasses.NeuralNode;
+import java.util.ArrayList;
+
 /**
  *
  * @author Sumner
@@ -22,6 +25,10 @@ public class Stomach extends BodyPart{
     private static final int DAMAGE_RESIST = 2;
     private static final int TOXIN_REMOVE_RATE = 1;
     private static final boolean NEURAL_CENTER = false;
+    
+    private NeuralNode hungerNode;
+    private int stomachContents = 0;
+    
     public Stomach(){
         super();
         this.setName(NAME);
@@ -29,5 +36,19 @@ public class Stomach extends BodyPart{
         this.setDigestionRate(DIGESTION_RATE);
         this.setRehealRate(REHEAL_RATE);
         this.setToxinRemovalRate(TOXIN_REMOVE_RATE);
+        
+        hungerNode = new NeuralNode(false,false);
+        this.nodeList.add(hungerNode);
+    }
+    
+    @Override
+    public void update(){
+        super.update();
+        this.stomachContents -= this.getDigestionRate();
+    }
+    
+    @Override
+    public void updateNodes(){
+        //TODO make the node activate when contents is "low"
     }
 }

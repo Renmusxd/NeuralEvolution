@@ -49,6 +49,12 @@ public class BodyPart {
         this.nodeList = new ArrayList<NeuralNode>();
     }
 
+    public void update(){
+        if (health<MAX_HEALTH){
+            health+=rehealRate;
+        }
+    }
+    
     public void updateNodes(){
         
     }
