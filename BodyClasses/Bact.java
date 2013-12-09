@@ -35,7 +35,7 @@ public class Bact {
     
     
     public Bact(int x, int y, int theta){
-        this(x,y,theta,Bact.randomDNA());
+        this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
     }
     public Bact(int x, int y, int theta,String DNA){
         nnm = new NeuralNetworkManager();
@@ -63,7 +63,7 @@ public class Bact {
         
     }
     
-    public static String randomDNA(){
+    public static String randomDNA(int length){
         return null;
     }
 }
