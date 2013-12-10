@@ -9,6 +9,7 @@ import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -24,8 +25,13 @@ public class Bact {
     
     // All use 1n+8n data
     public static final char TRAIT_PRIMER = 'A';
+    public static final byte TRAIT_LENGTH = 4;
+    
     public static final char BODY_PRIMER = 'B';
+    public static final byte BODY_LENGTH = 9;
+    
     public static final char NEURAL_PRIMER = 'C';
+    public static final byte NEURAL_LENGTH = 9;
     
     private final static int DEFAULT_DNA_LENGTH = 900;
     
@@ -38,9 +44,6 @@ public class Bact {
     private Movement pos;
     private int drawSize;
     
-    private float maxBloodVolume; //calculated from sum of hearts and such
-    private float totalBloodVolume;
-    
     
     public Bact(int x, int y, int theta){
         this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
@@ -51,8 +54,6 @@ public class Bact {
         nnm = new NeuralNetworkManager(DNA);
         pos = new Movement(x,y,theta);
         
-        // Getting appropriate values from body
-        this.maxBloodVolume = body.getMaxBloodVolume();
         
     }
     
@@ -98,18 +99,32 @@ public class Bact {
     
     public static Gene[] randomDNA(int length){
         // TODO Should be fixed later
+        
+        // Makes random string
         Random rnd = new Random();
         StringBuilder sb = new StringBuilder(length);
         for( int i = 0; i < length; i++ ) 
             sb.append( ALPHABET.charAt( rnd.nextInt(ALPHABET.length()) ) );
         String DNA = sb.toString();
-        String[] geneArray = DNA.split("(?<=\\G.{4})");
-        Gene[] genes = new Gene[(length%GENE_LENGTH==0)?length/GENE_LENGTH:(length/GENE_LENGTH)+1];
-        int i = 0;
-        for (String gene:geneArray){
-            genes[i] = new Gene(gene.charAt(0),gene.substring(1));
-            i++;
+        
+        // Breaks string into genes
+        int botViewPos = 0;
+        int stringLength = DNA.length();
+        ArrayList<Gene> genes = new ArrayList<Gene>();
+        while (botViewPos<stringLength){
+            char primerChar = DNA.charAt(botViewPos);
+            if (primerChar==TRAIT_PRIMER){
+                // adds gene with primer plus either (rest of DNA) or (demanded amount of DNA)
+                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+TRAIT_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+TRAIT_LENGTH)));
+                botViewPos+=TRAIT_LENGTH;
+            } else if (primerChar==BODY_PRIMER){
+                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+BODY_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+BODY_LENGTH)));
+                botViewPos+=BODY_LENGTH;
+            } else if (primerChar==NEURAL_PRIMER){
+                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+NEURAL_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+NEURAL_LENGTH)));
+                botViewPos+=NEURAL_LENGTH;
+            }
         }
-        return genes;
+        return genes.toArray(new Gene[0]);
     }
 }

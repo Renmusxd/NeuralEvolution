@@ -25,20 +25,24 @@ class BodyGraph {
      * Make sure there are no loops
      */
     private static final byte INCASE = 0;
-    private static final byte FRONT = 1;
-    private static final byte BACK = 2;
-    private static final byte LEFT = 3;
-    private static final byte RIGHT = 4;
-    private static final byte TOP = 5;
-    private static final byte BOTTOM = 6;
-    
+    private static final byte INSIDE = 1;
+    private static final byte FRONT = 2;
+    private static final byte BACK = 3;
+    private static final byte LEFT = 4;
+    private static final byte RIGHT = 5;
+    private static final byte TOP = 6;
+    private static final byte BOTTOM = 7;
     
     private BodyPartNode startingNode;
     
     private HashMap<String,BodyPartNode> nodeIDMap;
     
+    private int maxBloodVolume;
+    private float totalBlood;
+    
     public BodyGraph(Gene[] DNA){
         this.parseDNA(DNA);
+        this.maxBloodVolume = this.getMaxBloodVolume();
     }
     
     
@@ -50,7 +54,16 @@ class BodyGraph {
     
     private void addBodyPart(String identifier, BodyPart bp, String target, byte side){
         if (nodeIDMap.containsKey(target)){
-            
+            switch(side){
+                case INCASE: break;
+                case INSIDE: break;
+                case FRONT: break;
+                case BACK: break;
+                case LEFT: break;
+                case RIGHT: break;
+                case TOP: break;
+                case BOTTOM: break;
+            }
         } // else jst pretend the DNA doesn't exist
     }
     
@@ -64,7 +77,7 @@ class BodyGraph {
         return 0;
     }
     
-    public float getMaxBloodVolume() {
+    private int getMaxBloodVolume() {
         int blood = 0;
         for(Entry<String, BodyPartNode> entry : nodeIDMap.entrySet()) {
             blood+=entry.getValue().getBodyPart().getBloodVolume();
