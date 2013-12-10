@@ -4,14 +4,21 @@
  */
 package NeuralEvolution.NeuronClasses;
 
+import NeuralEvolution.SpecificGameClasses.Gene;
+import java.util.HashMap;
+
 /**
  *
  * @author Sumner
  */
 public class NeuralNetworkManager {
  
-    public NeuralNetworkManager(String DNA){
+    
+    private HashMap<String,NeuralNode> nodeIDMap;
+    
+    public NeuralNetworkManager(Gene[] DNA){
         this.parseDNA(DNA);
+        nodeIDMap = new HashMap<String,NeuralNode>();
     }
     
     public void addInputNode(){
@@ -22,7 +29,7 @@ public class NeuralNetworkManager {
         return null;
     }
 
-    public void parseDNA(String DNA) {
+    private void parseDNA(Gene[] DNA){
         
     }
 }

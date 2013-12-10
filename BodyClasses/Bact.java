@@ -5,6 +5,7 @@
 package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
+import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -18,15 +19,17 @@ public class Bact {
      * TODO get sexual reproduction integrated, we'll start with asexual.
      */
     public static final String ALPHABET = "ABCD";
-    //public static final String DNA_INITIALIZAER = "AAAA";
+    public static final char TRAIT_PRIMER = 'A';
+    public static final char BODY_PRIMER = 'B';
+    public static final char NEURAL_PRIMER = 'C';
     
-    private final static int DEFAULT_DNA_LENGTH = 100;
+    private final static int DEFAULT_DNA_LENGTH = 900;
     
     private NeuralNetworkManager nnm;
     
     private BodyGraph body;
     //Traits
-    private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency, muscleDensity;
+    private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency;
     
     private Movement pos;
     
@@ -37,14 +40,14 @@ public class Bact {
     public Bact(int x, int y, int theta){
         this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
     }
-    public Bact(int x, int y, int theta,String DNA){
+    public Bact(int x, int y, int theta,Gene[] DNA){
         this.parseDNA(DNA);
-        nnm.parseDNA(DNA);
         body = new BodyGraph(DNA);
         nnm = new NeuralNetworkManager(DNA);
         pos = new Movement(x,y,theta);
+        
         // Getting appropriate values from body
-        body.getBloodVolume();
+        this.maxBloodVolume = body.getMaxBloodVolume();
         
     }
     
@@ -59,7 +62,7 @@ public class Bact {
         return true;
     }
     
-    private void parseDNA(String DNA){
+    private void parseDNA(Gene[] DNA){
         //Picks appropriate DNA segments and sets traits
     }
     
@@ -67,7 +70,7 @@ public class Bact {
         
     }
     
-    public static String randomDNA(int length){
+    public static Gene[] randomDNA(int length){
         return null;
     }
 }
