@@ -64,6 +64,7 @@ public class Bact {
     }
     
     public boolean isAlive(){
+        // TODO bact death
         // blood = 0 or brain damaged
         return true;
     }
@@ -82,7 +83,7 @@ public class Bact {
         }
     }
     
-    private int convertGeneticsToInt(String gene){
+    public static int convertGeneticsToInt(String gene){
         // Reads from left to right, left: ^0, etc...
         int n = ALPHABET.length();
         int total = 0;
@@ -91,23 +92,14 @@ public class Bact {
             total+= v*(Math.pow(n, i));
         }
         return total;
+        // TODO test
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
-        
+        // TODO draw bact
     }
     
-    public static Gene[] randomDNA(int length){
-        // TODO Should be fixed later
-        
-        // Makes random string
-        Random rnd = new Random();
-        StringBuilder sb = new StringBuilder(length);
-        for( int i = 0; i < length; i++ ) 
-            sb.append( ALPHABET.charAt( rnd.nextInt(ALPHABET.length()) ) );
-        String DNA = sb.toString();
-        
-        // Breaks string into genes
+    public static Gene[] makeGenesFromString(String DNA){
         int botViewPos = 0;
         int stringLength = DNA.length();
         ArrayList<Gene> genes = new ArrayList<Gene>();
@@ -126,5 +118,15 @@ public class Bact {
             }
         }
         return genes.toArray(new Gene[0]);
+    }
+    
+    public static Gene[] randomDNA(int length){
+        // Makes random string
+        Random rnd = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for( int i = 0; i < length; i++ ) 
+            sb.append( ALPHABET.charAt( rnd.nextInt(ALPHABET.length())) );
+        String DNA = sb.toString();
+        return makeGenesFromString(DNA);
     }
 }

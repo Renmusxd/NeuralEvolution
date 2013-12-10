@@ -52,6 +52,6 @@ public class Eye extends BodyPart{
     
     @Override
     public void updateNodes(){
-        // TODO
+        // TODO eye vision
     }
 }

@@ -35,6 +35,7 @@ class BodyGraph {
     
     private BodyPartNode startingNode;
     
+    private HashMap<String,BodyPartNode> unlinkedIDMap;
     private HashMap<String,BodyPartNode> nodeIDMap;
     
     private int maxBloodVolume;
@@ -43,6 +44,8 @@ class BodyGraph {
     public BodyGraph(Gene[] DNA){
         this.parseDNA(DNA);
         this.maxBloodVolume = this.getMaxBloodVolume();
+        nodeIDMap = new HashMap<String,BodyPartNode>();
+        unlinkedIDMap = new HashMap<String,BodyPartNode>();
     }
     
     
@@ -50,20 +53,41 @@ class BodyGraph {
         // Starts by adding brain
         this.startingNode = new BodyPartNode(new Brain());
         nodeIDMap.put("AAAA", startingNode);
+        // TODO parse DNA
     }
     
-    private void addBodyPart(String identifier, BodyPart bp, String target, byte side){
-        if (nodeIDMap.containsKey(target)){
-            switch(side){
-                case INCASE: break;
-                case INSIDE: break;
-                case FRONT: break;
-                case BACK: break;
-                case LEFT: break;
-                case RIGHT: break;
-                case TOP: break;
-                case BOTTOM: break;
+    private void makeBodyPart(String type, String ID){
+        // TODO make body parts
+        //First two n are type, second four are id
+        
+    }
+    
+    private void linkBodyPart(String identifier, String target, byte side){
+        // Links body part to other body part 
+        if (unlinkedIDMap.containsKey(identifier) && nodeIDMap.containsKey(target)){
+            // Make sure id is not above target
+            BodyPartNode newBPN = unlinkedIDMap.get(identifier);
+            BodyPartNode targetBPN = nodeIDMap.get(target);
+            BodyPartNode prev = newBPN.getPrevious();
+            while (prev!=null){
+                if (prev.equals(newBPN)){
+                    // If it is above what would be itself, ignore link, carry on with life
+                    return;
+                }
             }
+            // If newBPN is not above target
+            // Add to target and set previous
+            switch(side){
+                case INCASE: targetBPN.addOutside(newBPN); break;
+                case INSIDE: targetBPN.addInside(newBPN); break;
+                case FRONT: targetBPN.addFront(newBPN); break;
+                case BACK: targetBPN.addBack(newBPN); break;
+                case LEFT: targetBPN.addLeft(newBPN); break;
+                case RIGHT: targetBPN.addRight(newBPN); break;
+                case TOP: targetBPN.addTop(newBPN); break;
+                case BOTTOM: targetBPN.addBottom(newBPN); break;
+            }
+            newBPN.setPrevious(nodeIDMap.get(target));
         } // else jst pretend the DNA doesn't exist
     }
     
@@ -74,6 +98,7 @@ class BodyGraph {
     }
     
     public float getBloodVolume(){
+        // TODO blood loss
         return 0;
     }
     
@@ -86,7 +111,7 @@ class BodyGraph {
     }
     
     public Movement bodyMotion(){
-        // Based on current system behavior, calculate movement change
+        // TODO Based on current system behavior, calculate movement change
         return null;
     }
 }
