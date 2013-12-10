@@ -40,7 +40,6 @@ public class Bact {
     public Bact(int x, int y, int theta,String DNA){
         nnm = new NeuralNetworkManager();
         body = new BodyGraph(new Brain());
-        //Parse DNA
         this.parseDNA(DNA);
         nnm.parseDNA(DNA);
         body.parseDNA(DNA);
@@ -48,11 +47,14 @@ public class Bact {
     }
     
     public void update(){
-        // TODO
+        this.body.updateBodyParts();
+        this.pos.add(this.body.bodyMotion());
+        
     }
     
     public boolean isAlive(){
-        return false;
+        // blood = 0 or brain damaged
+        return true;
     }
     
     private void parseDNA(String DNA){

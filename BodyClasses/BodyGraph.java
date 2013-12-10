@@ -4,6 +4,8 @@
  */
 package NeuralEvolution.BodyClasses;
 
+import NeuralEvolution.UtilityClasses.Movement;
+
 /**
  *
  * @author Sumner
@@ -35,6 +37,15 @@ class BodyGraph {
     
     public void parseDNA(String DNA) {
         //TODO
+    }
+    
+    public void updateBodyParts(){
+        
+    }
+    
+    public Movement bodyMotion(){
+        // Based on current system behavior, calculate movement change
+        return null;
     }
     
 }
