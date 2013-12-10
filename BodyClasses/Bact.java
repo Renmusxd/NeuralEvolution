@@ -9,6 +9,7 @@ import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Random;
 
 /**
  *
@@ -19,6 +20,9 @@ public class Bact {
      * TODO get sexual reproduction integrated, we'll start with asexual.
      */
     public static final String ALPHABET = "ABCD";
+    public static final byte GENE_LENGTH = 9;
+    
+    // All use 1n+8n data
     public static final char TRAIT_PRIMER = 'A';
     public static final char BODY_PRIMER = 'B';
     public static final char NEURAL_PRIMER = 'C';
@@ -63,7 +67,7 @@ public class Bact {
     }
     
     private void parseDNA(Gene[] DNA){
-        //Picks appropriate DNA segments and sets traits
+        
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
@@ -71,6 +75,19 @@ public class Bact {
     }
     
     public static Gene[] randomDNA(int length){
-        return null;
+        // TODO Should be fixed later
+        Random rnd = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for( int i = 0; i < length; i++ ) 
+            sb.append( ALPHABET.charAt( rnd.nextInt(ALPHABET.length()) ) );
+        String DNA = sb.toString();
+        String[] geneArray = DNA.split("(?<=\\G.{4})");
+        Gene[] genes = new Gene[(length%GENE_LENGTH==0)?length/GENE_LENGTH:(length/GENE_LENGTH)+1];
+        int i = 0;
+        for (String gene:geneArray){
+            genes[i] = new Gene(gene.charAt(0),gene.substring(1));
+            i++;
+        }
+        return genes;
     }
 }
