@@ -23,24 +23,21 @@ class BodyGraph {
      */
     private BodyPartNode startingNode;
     
-    public BodyGraph(Brain startingBrain){
-        this(new BodyPartNode(startingBrain));
-    }
-    public BodyGraph(BodyPartNode bpn){
-        if (bpn.getBodyPart() instanceof Brain){
-            startingNode = bpn;
-        } else {
-            throw new Error("Brains needed");
-        }
+    public BodyGraph(String DNA){
+        this.parseDNA(DNA);
     }
     
     
-    public void parseDNA(String DNA) {
+    private void parseDNA(String DNA) {
         //TODO
     }
     
     public void updateBodyParts(){
         
+    }
+    
+    public float getBloodVolume(){
+        return 0;
     }
     
     public Movement bodyMotion(){

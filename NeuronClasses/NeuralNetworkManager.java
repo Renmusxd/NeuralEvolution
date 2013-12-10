@@ -10,11 +10,8 @@ package NeuralEvolution.NeuronClasses;
  */
 public class NeuralNetworkManager {
  
-    public NeuralNetworkManager(){
-        
-    }
-    public NeuralNetworkManager(String encodedNetwork){
-        
+    public NeuralNetworkManager(String DNA){
+        this.parseDNA(DNA);
     }
     
     public void addInputNode(){

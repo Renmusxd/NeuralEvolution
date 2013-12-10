@@ -38,12 +38,14 @@ public class Bact {
         this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
     }
     public Bact(int x, int y, int theta,String DNA){
-        nnm = new NeuralNetworkManager();
-        body = new BodyGraph(new Brain());
         this.parseDNA(DNA);
         nnm.parseDNA(DNA);
-        body.parseDNA(DNA);
+        body = new BodyGraph(DNA);
+        nnm = new NeuralNetworkManager(DNA);
         pos = new Movement(x,y,theta);
+        // Getting appropriate values from body
+        body.getBloodVolume();
+        
     }
     
     public void update(){
