@@ -36,6 +36,7 @@ public class Bact {
     private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency;
     
     private Movement pos;
+    private int drawSize;
     
     private float maxBloodVolume; //calculated from sum of hearts and such
     private float totalBloodVolume;
@@ -67,7 +68,28 @@ public class Bact {
     }
     
     private void parseDNA(Gene[] DNA){
-        
+        for (Gene gene : DNA){
+            if (gene.getPrimer()==TRAIT_PRIMER){
+                int delta = convertGeneticsToInt(gene.getGene().substring(1));
+                switch (gene.getGene().charAt(0)){
+                    case 'A': this.meatEnzymeProduction+=delta; break;
+                    case 'B': this.vegEnzymeProduction+=delta; break;
+                    case 'C': this.mutationFrequency+=delta; break;
+                    case 'D': break;
+                }
+            }
+        }
+    }
+    
+    private int convertGeneticsToInt(String gene){
+        // Reads from left to right, left: ^0, etc...
+        int n = ALPHABET.length();
+        int total = 0;
+        for (int i = 0; i<gene.length(); i++){
+            int v = ALPHABET.indexOf(gene.charAt(i));
+            total+= v*(Math.pow(n, i));
+        }
+        return total;
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
