@@ -12,18 +12,36 @@ import java.util.ArrayList;
 public class BodyPartNode {
     
     private BodyPart bp;
-    private ArrayList<BodyPartNode> previousNodes = null;
-    private ArrayList<BodyPartNode> nextNodes = null;
+    private ArrayList<BodyPartNode> inside;
+    private ArrayList<BodyPartNode> outside;
+    private ArrayList<BodyPartNode> front;
+    private ArrayList<BodyPartNode> back;
+    private ArrayList<BodyPartNode> left;
+    private ArrayList<BodyPartNode> right;
+    private ArrayList<BodyPartNode> top;
+    private ArrayList<BodyPartNode> bottom;
     
     
     public BodyPartNode(BodyPart bp){
         this.bp = bp;
+        inside = new ArrayList<BodyPartNode>();
+        outside = new ArrayList<BodyPartNode>();
+        front = new ArrayList<BodyPartNode>();
+        back = new ArrayList<BodyPartNode>();
+        left = new ArrayList<BodyPartNode>();
+        right = new ArrayList<BodyPartNode>();
+        top = new ArrayList<BodyPartNode>();
+        bottom = new ArrayList<BodyPartNode>();
     }
     
-    public BodyPartNode[] getNext(){return this.nextNodes.toArray(new BodyPartNode[0]);}
-    public void setNext(BodyPartNode bpn){this.nextNodes.add(bpn);}
-    public BodyPartNode[] getPrevious(){return this.nextNodes.toArray(new BodyPartNode[0]);}
-    public void setPrevious(BodyPartNode bpn){this.previousNodes.add(bpn);}
+    public void addInside(BodyPartNode bpn){inside.add(bpn);}
+    public void addOutside(BodyPartNode bpn){outside.add(bpn);}
+    public void addFront(BodyPartNode bpn){front.add(bpn);}
+    public void addBack(BodyPartNode bpn){back.add(bpn);}
+    public void addLeft(BodyPartNode bpn){left.add(bpn);}
+    public void addRight(BodyPartNode bpn){right.add(bpn);}
+    public void addTop(BodyPartNode bpn){top.add(bpn);}
+    public void addBottom(BodyPartNode bpn){bottom.add(bpn);}
     public BodyPart getBodyPart(){return bp;}
     
 }
