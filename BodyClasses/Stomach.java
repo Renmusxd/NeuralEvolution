@@ -51,5 +51,6 @@ public class Stomach extends BodyPart{
     @Override
     public void updateNodes(){
         //TODO make the node activate when contents is "low"
+        
     }
 }
