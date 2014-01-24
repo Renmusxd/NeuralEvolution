@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package NeuralEvolution.NeuronClasses;
 
 import java.util.ArrayList;
@@ -12,7 +8,7 @@ import java.util.ArrayList;
  */
 public class NeuralNode {
     /*
-     * Make sure there are no loops 
+     * TODO Make sure there are no loops 
      * 
      */
     public static final boolean AND_OPERATION = false;

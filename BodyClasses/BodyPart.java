@@ -66,6 +66,8 @@ public class BodyPart {
         
     }
 
+    public boolean isPushingBact(){return false;}
+    
     public int getHealth() {
         return health;
     }

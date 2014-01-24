@@ -5,7 +5,6 @@
 package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.NeuronClasses.NeuralNode;
-import java.util.ArrayList;
 
 /**
  *

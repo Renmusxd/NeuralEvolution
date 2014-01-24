@@ -41,6 +41,8 @@ public class Muscle extends BodyPart{
         this.nodeList.add(pushMuscle);
         this.nodeList.add(pullMuscle);
     }
+    @Override
+    public boolean isPushingBact(){return (pushMuscle.getState()||pullMuscle.getState());} 
     
     public boolean isPushing(){return pushMuscle.getState();}
     public boolean isPulling(){return pullMuscle.getState();}

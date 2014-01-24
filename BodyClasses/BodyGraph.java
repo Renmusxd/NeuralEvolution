@@ -6,6 +6,7 @@ package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.UtilityClasses.Movement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -24,17 +25,18 @@ class BodyGraph {
      * 
      * Make sure there are no loops
      */
-    private static final byte INCASE = 0;
-    private static final byte INSIDE = 1;
-    private static final byte FRONT = 2;
-    private static final byte BACK = 3;
-    private static final byte LEFT = 4;
-    private static final byte RIGHT = 5;
-    private static final byte TOP = 6;
-    private static final byte BOTTOM = 7;
+    public static final byte INCASE = 0;
+    public static final byte INSIDE = 1;
+    public static final byte FRONT = 2;
+    public static final byte BACK = 3;
+    public static final byte LEFT = 4;
+    public static final byte RIGHT = 5;
+    public static final byte TOP = 6;
+    public static final byte BOTTOM = 7;
     
     private BodyPartNode startingNode;
     
+    private ArrayList<BodyPartNode> muscleNodes;
     private HashMap<String,BodyPartNode> unlinkedIDMap;
     private HashMap<String,BodyPartNode> nodeIDMap;
     
@@ -111,7 +113,9 @@ class BodyGraph {
     }
     
     public Movement bodyMotion(){
-        // TODO Based on current system behavior, calculate movement change
+        for(Entry<String, BodyPartNode> entry: nodeIDMap.entrySet()){
+            
+        }
         return null;
     }
 }
