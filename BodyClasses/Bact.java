@@ -32,8 +32,7 @@ public class Bact {
     private final static int DEFAULT_DNA_LENGTH = 900;
     
     private NeuralNetworkManager nnm;
-    
-    private BodyGraph body;
+
     //Traits
     private int meatEnzymeProduction, vegEnzymeProduction, mutationFrequency;
     
@@ -46,16 +45,11 @@ public class Bact {
     }
     public Bact(int x, int y, int theta,Gene[] DNA){
         this.parseDNA(DNA);
-        body = new BodyGraph(DNA);
         nnm = new NeuralNetworkManager(DNA);
         pos = new Movement(x,y,theta);
-        
-        
     }
     
     public void update(){
-        this.body.updateBodyParts();
-        this.pos.add(this.body.bodyMotion());
         
     }
     
@@ -92,7 +86,7 @@ public class Bact {
     }
     
     public void draw(Graphics2D g, int xoffset, int yoffset){
-        // TODO draw bact
+        g.fillOval(pos.getX(), pos.getY(), drawSize, drawSize);
     }
     
     public static Gene[] makeGenesFromString(String DNA){
