@@ -17,17 +17,15 @@ public class Bact {
      * TODO get sexual reproduction integrated, we'll start with asexual.
      */
     public static final String ALPHABET = "ABCD";
-    public static final byte GENE_LENGTH = 9;
     
-    // All use 1n+8n data
     public static final char TRAIT_PRIMER = 'A';
-    public static final byte TRAIT_LENGTH = 4;
+    public static final byte TRAIT_LENGTH = 9;
     
-    public static final char BODY_PRIMER = 'B';
-    public static final byte BODY_LENGTH = 9;
+    public static final char NEURON_PRIMER = 'B';
+    public static final byte NEURON_LENGTH = 7;
     
-    public static final char NEURAL_PRIMER = 'C';
-    public static final byte NEURAL_LENGTH = 9;
+    public static final char NPATH_PRIMER = 'C';
+    public static final byte NPATH_LENGTH = 7;
     
     private final static int DEFAULT_DNA_LENGTH = 900;
     
@@ -50,24 +48,25 @@ public class Bact {
     }
     
     public void update(){
-        
+        // Check what the neural network is up to
     }
     
     public boolean isAlive(){
         // TODO bact death
-        // blood = 0 or brain damaged
         return true;
     }
     
     private void parseDNA(Gene[] DNA){
         for (Gene gene : DNA){
             if (gene.getPrimer()==TRAIT_PRIMER){
-                int delta = convertGeneticsToInt(gene.getGene().substring(1));
-                switch (gene.getGene().charAt(0)){
-                    case 'A': this.meatEnzymeProduction+=delta; break;
-                    case 'B': this.vegEnzymeProduction+=delta; break;
-                    case 'C': this.mutationFrequency+=delta; break;
-                    case 'D': break;
+                if (gene.getGene().length()==(TRAIT_LENGTH-1)){
+                    int delta = convertGeneticsToInt(gene.getGene().substring(1));
+                    switch (gene.getGene().charAt(0)){
+                        case 'A': this.meatEnzymeProduction+=delta; break;
+                        case 'B': this.vegEnzymeProduction+=delta; break;
+                        case 'C': this.mutationFrequency+=delta; break;
+                        case 'D': break;
+                    }
                 }
             }
         }
@@ -95,16 +94,16 @@ public class Bact {
         ArrayList<Gene> genes = new ArrayList<Gene>();
         while (botViewPos<stringLength){
             char primerChar = DNA.charAt(botViewPos);
+            // adds gene with primer plus either (rest of DNA) or (demanded amount of DNA)
             if (primerChar==TRAIT_PRIMER){
-                // adds gene with primer plus either (rest of DNA) or (demanded amount of DNA)
                 genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+TRAIT_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+TRAIT_LENGTH)));
                 botViewPos+=TRAIT_LENGTH;
-            } else if (primerChar==BODY_PRIMER){
-                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+BODY_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+BODY_LENGTH)));
-                botViewPos+=BODY_LENGTH;
-            } else if (primerChar==NEURAL_PRIMER){
-                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+NEURAL_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+NEURAL_LENGTH)));
-                botViewPos+=NEURAL_LENGTH;
+            } else if (primerChar==NEURON_PRIMER){
+                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+NEURON_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+NEURON_LENGTH)));
+                botViewPos+=NEURON_LENGTH;
+            } else if (primerChar==NPATH_PRIMER){
+                genes.add(new Gene(primerChar,DNA.substring(botViewPos+1, (botViewPos+NPATH_LENGTH>=DNA.length())?DNA.length()-1:botViewPos+NPATH_LENGTH)));
+                botViewPos+=NPATH_LENGTH;
             }
         }
         return genes.toArray(new Gene[0]);

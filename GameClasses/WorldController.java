@@ -36,10 +36,9 @@ public class WorldController { // A multithread compatible update and graphics l
 	
 	public void loop(){
 		myGameWindow = myWorkhorse.getGameWindow();
-		
 		// read prefs
 		final double GAME_U_GHERTZ = 20.0; // update frequency //also graphics for single core systems
-		final double GAME_G_GHERTZ = 80.0; // graphics frequency
+		final double GAME_G_GHERTZ = 60.0; // graphics frequency
 		final double G_TIME_BETWEEN_UPDATES = A_BILLION / GAME_G_GHERTZ;
 		final double U_TIME_BETWEEN_UPDATES = A_BILLION / GAME_U_GHERTZ;
 		double lastupdateTime = System.nanoTime();
@@ -50,7 +49,6 @@ public class WorldController { // A multithread compatible update and graphics l
 		this.addUpdatable(myWorld);
 		this.addDrawable(myWorld);
 		// this code can be removed for a more customizable system
-		
 		
 		boolean multipleCores = Runtime.getRuntime().availableProcessors()>1; // if the computer only has one core it will default to single thread u/g
 		if (multipleCores && myWorkhorse.MULTICORE){
@@ -63,13 +61,13 @@ public class WorldController { // A multithread compatible update and graphics l
 				public void run() {
 					while (looping){
 						now = System.nanoTime();
-						if (!paused){tick();} 										// update call
+						if (!paused){tick();} 							// update call
 						while ( (now - lastupdateTime) < U_TIME_BETWEEN_UPDATES){		// if not enough time please wait
-							Thread.yield();											// threading sleep stuff
-							try{Thread.sleep(1);} catch (Exception e){}				// """"
-							now = System.nanoTime();								// """"
+							Thread.yield();							// threading sleep stuff
+							try{Thread.sleep(1);} catch (Exception e){}			// """"
+							now = System.nanoTime();					// """"
 						}
-						u_fps = A_BILLION / (now - lastupdateTime);					// update fps
+						u_fps = A_BILLION / (now - lastupdateTime);				// update fps
 						lastupdateTime = now;
 					}
 				}

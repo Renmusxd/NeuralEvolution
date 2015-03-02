@@ -35,61 +35,61 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
 	
         @SuppressWarnings("LeakingThisInConstructor")
 	public World(WorldController wc) {
-		myWorldController = wc;
-		myWorldController.getGameWindow().addKeyListener(this);
-		myWorldController.getGameWindow().addMouseListener(this);
-		myWorldController.getGameWindow().getFrame().addComponentListener(this);
-		WindowWidth = myWorldController.getGameWindow().WIDTH;
-		WindowHeight = myWorldController.getGameWindow().HEIGHT;
-                
-                myMap = new Map(0,0);
-                bactAddArray = new ArrayList<Bact>();
-                bactArray = new ArrayList<Bact>();
-                bactRemoveArray = new ArrayList<Bact>();
-                bactDrawAddArray = new ArrayList<Bact>();
-                bactDrawArray = new ArrayList<Bact>();
-                bactDrawRemoveArray = new ArrayList<Bact>();
-                
-                this.addBact(new Bact(100,100,0));
+            myWorldController = wc;
+            myWorldController.getGameWindow().addKeyListener(this);
+            myWorldController.getGameWindow().addMouseListener(this);
+            myWorldController.getGameWindow().getFrame().addComponentListener(this);
+            WindowWidth = myWorldController.getGameWindow().WIDTH;
+            WindowHeight = myWorldController.getGameWindow().HEIGHT;
+
+            myMap = new Map(0,0);
+            bactAddArray = new ArrayList<Bact>();
+            bactArray = new ArrayList<Bact>();
+            bactRemoveArray = new ArrayList<Bact>();
+            bactDrawAddArray = new ArrayList<Bact>();
+            bactDrawArray = new ArrayList<Bact>();
+            bactDrawRemoveArray = new ArrayList<Bact>();
+
+            this.addBact(new Bact(100,100,0));
 	}
 
 	@Override
 	public void draw(Graphics2D g) { // please keep in mind this can be multithreaded with the updates, disable if needed
-                myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
-                for (Bact b : bactDrawArray){
-                    /**
-                     * If bacteria is at all visible, draw it, else don't
-                     * tell the bacteria where to draw with: b.draw(g,xoffset,yoffset);
-                     */
-                    if (true){
-                        b.draw(g,this.view_Xoffset, this.view_Yoffset);
-                    }
+            myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
+            for (Bact b : bactDrawArray){
+                /**
+                 * If bacteria is at all visible, draw it, else don't
+                 * tell the bacteria where to draw with: b.draw(g,xoffset,yoffset);
+                 */
+                if (true){
+                    b.draw(g,this.view_Xoffset, this.view_Yoffset);
                 }
-                this.bactDrawArray.addAll(this.bactDrawAddArray);
-                this.bactDrawAddArray.clear();
-                this.bactDrawArray.removeAll(this.bactDrawRemoveArray);
-                this.bactDrawRemoveArray.clear();
-                if (this.debug){
-                    g.setColor(Color.black);
-                    g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
-                    g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
-                    if (this.paused){
-                            g.setColor(Color.red);
-                            g.drawString("PAUSED", WindowWidth - 50, 10);
-                    }
+            }
+            this.bactDrawArray.addAll(this.bactDrawAddArray);
+            this.bactDrawAddArray.clear();
+            this.bactDrawArray.removeAll(this.bactDrawRemoveArray);
+            this.bactDrawRemoveArray.clear();
+            if (this.debug){
+                g.setColor(Color.black);
+                g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
+                g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
+                if (this.paused){
+                        g.setColor(Color.red);
+                        g.drawString("PAUSED", WindowWidth - 50, 10);
                 }
+            }
 	}
 
 	@Override
 	public void update() { // please keep in mind this can be multithreaded with the graphics, disable if needed
-                for (Bact b : bactArray){
-                    b.update();
-                    if (!b.isAlive()){bactRemoveArray.add(b);}
-                }
-                this.bactArray.addAll(this.bactAddArray);
-                this.bactAddArray.clear();
-                this.bactArray.removeAll(this.bactRemoveArray);
-                this.bactRemoveArray.clear();
+            for (Bact b : bactArray){
+                b.update();
+                if (!b.isAlive()){bactRemoveArray.add(b);}
+            }
+            this.bactArray.addAll(this.bactAddArray);
+            this.bactAddArray.clear();
+            this.bactArray.removeAll(this.bactRemoveArray);
+            this.bactRemoveArray.clear();
 	}
 	
         public void addBact(Bact b){

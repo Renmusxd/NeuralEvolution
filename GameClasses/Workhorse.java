@@ -10,17 +10,15 @@ public class Workhorse {
 	public GameWindow gw;
 	
 	public Workhorse() {
-		wc = new WorldController(this);
-		gw = new GameWindow(this);
-		Thread loop = new Thread()
-	      {
-	         public void run()
-	         {
-	            wc.loop();
-	            System.exit(0);
-	         }
-	      };
-	      loop.start();
+            wc = new WorldController(this);
+            gw = new GameWindow(this);
+            Thread loop = new Thread() {
+            public void run(){
+                System.out.println("Starting threaded loop");
+                wc.loop();
+                System.exit(0);
+            }};
+            loop.start();
 	}
 	
 	public WorldController getWorldController(){return wc;}
