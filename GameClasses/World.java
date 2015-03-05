@@ -2,6 +2,7 @@ package NeuralEvolution.GameClasses;
 
 import NeuralEvolution.BodyClasses.Bact;
 import NeuralEvolution.SpecificGameClasses.Map;
+import NeuralEvolution.SpecificGameClasses.NeuralThreader;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -13,7 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
-public class World implements Updatable, Drawable, KeyListener, MouseListener, ComponentListener { // The main world for objects to roam free
+public final class World implements Updatable, Drawable, KeyListener, MouseListener, ComponentListener { // The main world for objects to roam free
 
 	private WorldController myWorldController;
         
@@ -43,12 +44,12 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
             WindowHeight = myWorldController.getGameWindow().HEIGHT;
 
             myMap = new Map(0,0);
-            bactAddArray = new ArrayList<Bact>();
-            bactArray = new ArrayList<Bact>();
-            bactRemoveArray = new ArrayList<Bact>();
-            bactDrawAddArray = new ArrayList<Bact>();
-            bactDrawArray = new ArrayList<Bact>();
-            bactDrawRemoveArray = new ArrayList<Bact>();
+            bactAddArray = new ArrayList<>();
+            bactArray = new ArrayList<>();
+            bactRemoveArray = new ArrayList<>();
+            bactDrawAddArray = new ArrayList<>();
+            bactDrawArray = new ArrayList<>();
+            bactDrawRemoveArray = new ArrayList<>();
 
             this.addBact(new Bact(100,100,0));
 	}
@@ -82,9 +83,13 @@ public class World implements Updatable, Drawable, KeyListener, MouseListener, C
 
 	@Override
 	public void update() { // please keep in mind this can be multithreaded with the graphics, disable if needed
+            NeuralThreader.updateNetworks(bactArray);
             for (Bact b : bactArray){
                 b.update();
-                if (!b.isAlive()){bactRemoveArray.add(b);}
+                if (!b.isAlive()){
+                    bactRemoveArray.add(b);
+                    bactDrawRemoveArray.add(b);
+                }
             }
             this.bactArray.addAll(this.bactAddArray);
             this.bactAddArray.clear();

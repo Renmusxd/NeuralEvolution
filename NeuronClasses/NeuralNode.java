@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.Random;
 
 /**
- *
+ * The NeuralNode class controls the actions of nodes
+ * in the Bact's neural network.
  * @author Sumner
  */
 public class NeuralNode {
-    /*
-     * TODO Make sure there are no loops 
-     * 
-     */
     private static final Random rand = new Random();
     
     public enum INOP{
@@ -29,10 +26,11 @@ public class NeuralNode {
     
     private int state;
     
-    private ArrayList<NeuralNode> inputNodes;
-    private ArrayList<NeuralNode> outputNodes;
+    private final ArrayList<NeuralNode> inputNodes;
+    private final ArrayList<NeuralNode> outputNodes;
     
-    private HashMap<NeuralNode,Integer> outWeights;
+    int totalValue = 0; // Add one for new input, add one for learning
+    private final HashMap<NeuralNode,Integer> outWeights;
     
     /** Number of updates this cycle, limited to #inputs **/
     private byte updates;
@@ -47,49 +45,83 @@ public class NeuralNode {
     }
     public void addOutput(NeuralNode nn){
         outputNodes.add(nn);
+        outWeights.put(nn,1);
+        totalValue++;
     }
+    /**
+     * Must be called each time step to clear the update limiter.
+     */
     public void clear(){
         updates = 0;
     }
+    /**
+     * Updates this node, it then gathers information about its input nodes.
+     * A Node can only be updated n times per time step where n in the total
+     * number of nodes connected to this node.
+     */
     public void update(){
         updates++;
         if (updates<=inputNodes.size()){
             // TODO Check input nodes, calculate output
             int newstate = 0;
             if (in == INOP.AND){
-                newstate = 1;
+                newstate = inputNodes.get(0).getState();
                 for (NeuralNode n : inputNodes){
-                    if (n.getState()==0){
+                    int t = n.getState();
+                    if (t==0){
                         newstate = 0;
                         break;
+                    } else if (newstate>t){
+                        newstate = t;
                     }
                 }
             } else if (in == INOP.OR){
                 for (NeuralNode n : inputNodes){
-                    if (n.getState()!=0){
-                        newstate = 1;
-                        break;
+                    if (n.getState()>newstate){
+                        newstate = n.getState();
                     }
                 }
             }
             if (inverse){
-                this.setState((newstate==1)?0:1);
+                // Inverse can only output boolean
+                this.setState((newstate!=0)?0:1);
             } else {
                 this.setState(newstate);
             }
         }
     }
+    
+    /** 
+     * Chooses which nodes to poke when values are updated 
+     */
     public void updateOutputs(){
         if (out == OUTOP.ALL){
             for (NeuralNode n : outputNodes) {
                 n.update();
             }
         } else if (out == OUTOP.ONE){
-            outputNodes.get(rand.nextInt(outputNodes.size())).update();
+            int r = rand.nextInt(totalValue);
+            for (NeuralNode n : outputNodes){
+                r -= outWeights.get(n);
+                if (r<=0) {
+                    n.update();
+                    break;
+                }
+            }
         } else if (out == OUTOP.ANY){
-            
+            // TODO output any
         }
     }
+    
+    /**
+     * Rewards choices up to n time steps back. 
+     * Rewarded choices are more likely to be chosen in the future.
+     * @param n 
+     */
+    public void reward(int n){
+        // TODO reward choices up to n cycles back
+    }
+    
     public void setOperationString(String op){
         // 12 Possibilities
         if (op.length()==2){
@@ -135,13 +167,18 @@ public class NeuralNode {
             }
         }
     }
-    
+    /**
+     * Return current state of node.
+     * @return state
+     */
     public int getState(){
         return this.state;
     }
+
     public void setInverse(boolean b){
-        this.inverse = b; this.updateOutputs();
+        this.inverse = b;
     }
+    
     public void setState(int state){
         this.state = state;
         this.updateOutputs();

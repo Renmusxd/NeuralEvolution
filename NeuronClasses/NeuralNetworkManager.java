@@ -5,16 +5,31 @@ import NeuralEvolution.SpecificGameClasses.Gene;
 import java.util.HashMap;
 
 /**
- *
+ * Requires Node ID Lengths of 4 for automatic placement.
  * @author Sumner
  */
-public class NeuralNetworkManager {
+public final class NeuralNetworkManager {
 
-    private HashMap<String,NeuralNode> nodeIDMap;
+    private String ID_LOW = "AAAA";
     
-    public NeuralNetworkManager(Gene[] DNA){
+    private final HashMap<String,NeuralNode> nodeIDMap;
+    
+    public NeuralNetworkManager(Bact b){
+        nodeIDMap = new HashMap<>();
+    }
+    
+    public NeuralNetworkManager(Bact b, Gene[] DNA){
+        this(b);
         this.parseDNA(DNA);
-        nodeIDMap = new HashMap<String,NeuralNode>();
+    }
+    
+    public void update(){
+        // TODO update input nodes from Bact Body
+    }
+    
+    public void registerNode(NeuralNode n){
+        registerNode(ID_LOW, n);
+        incrementID();
     }
     
     public void registerNode(String s, NeuralNode n){
@@ -25,10 +40,10 @@ public class NeuralNetworkManager {
         return null;
     }
 
-    private void parseDNA(Gene[] DNA){
+    public void parseDNA(Gene[] DNA){
          for (Gene gene : DNA){
             if (gene.getPrimer()==Bact.NEURON_PRIMER){
-                if (gene.getGene().length()==(Bact.NEURON_LENGTH-1)){
+                if (gene.getGene().length()==Bact.NEURON_LENGTH){
                     // Check if neuron exists, edit info or create
                     String n = gene.getGene().substring(1,5);
                     String op = gene.getGene().substring(5,7);
@@ -42,13 +57,12 @@ public class NeuralNetworkManager {
                 }
             }
             if (gene.getPrimer()==Bact.NPATH_PRIMER){
-                if (gene.getGene().length()==(Bact.NPATH_PRIMER-1)){
+                if (gene.getGene().length()==Bact.NPATH_PRIMER){
                     String n1 = gene.getGene().substring(1,5);
                     String n2 = gene.getGene().substring(5,9);
                     NeuralNode node1; NeuralNode node2;
                     if (nodeIDMap.containsKey(n1)){
                         node1 = nodeIDMap.get(n1);
-                        
                     } else {
                         node1 = new NeuralNode();
                     }
@@ -66,4 +80,26 @@ public class NeuralNetworkManager {
             }
         }
     }
+    
+    private void incrementID(){
+        // Increment starting on left
+        char[] idArr = ID_LOW.toCharArray();
+        
+        int i = 0;
+        while (i<Bact.ALPHABET.length()) {
+            char x = idArr[i];
+            if (Bact.ALPHABET.indexOf(x) == Bact.ALPHABET.length()-1){
+                idArr[i] = Bact.ALPHABET.charAt(0);
+                i++;
+            } else {
+                idArr[i] = Bact.ALPHABET.charAt(i+1);
+                break;
+            }
+        }
+        if (i==Bact.ALPHABET.length()){
+            System.out.println("[!] Ran out of registers for nodes");
+        }
+        ID_LOW = new String(idArr);
+    }
+    
 }
