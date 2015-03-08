@@ -10,6 +10,7 @@ import java.util.Random;
  * @author Sumner
  */
 public class NeuralNode {
+    private String id = null;
     private static final Random rand = new Random();
     
     public enum INOP{
@@ -24,7 +25,7 @@ public class NeuralNode {
     private OUTOP out = OUTOP.ALL;
     private boolean inverse;
     
-    private int state;
+    private int state = 0;
     
     private final ArrayList<NeuralNode> inputNodes;
     private final ArrayList<NeuralNode> outputNodes;
@@ -34,7 +35,13 @@ public class NeuralNode {
     
     /** Number of updates this cycle, limited to #inputs **/
     private byte updates;
+    private boolean acceptsInput = true;
     
+    public NeuralNode(String s, boolean acceptsInput){
+        this();
+        id = s;
+        acceptsInput = false;
+    }
     public NeuralNode(){
         inputNodes = new ArrayList<>();
         outputNodes = new ArrayList<>();
@@ -61,8 +68,7 @@ public class NeuralNode {
      */
     public void update(){
         updates++;
-        if (updates<=inputNodes.size()){
-            // TODO Check input nodes, calculate output
+        if (updates<=inputNodes.size() && acceptsInput){
             int newstate = 0;
             if (in == INOP.AND){
                 newstate = inputNodes.get(0).getState();
@@ -88,28 +94,34 @@ public class NeuralNode {
             } else {
                 this.setState(newstate);
             }
+            this.updateOutputs();
         }
     }
     
+    int lastState = 0;
     /** 
      * Chooses which nodes to poke when values are updated 
+     * Only updates output if there have been changes.
      */
     public void updateOutputs(){
-        if (out == OUTOP.ALL){
-            for (NeuralNode n : outputNodes) {
-                n.update();
-            }
-        } else if (out == OUTOP.ONE){
-            int r = rand.nextInt(totalValue);
-            for (NeuralNode n : outputNodes){
-                r -= outWeights.get(n);
-                if (r<=0) {
+        if (outputNodes.size()>0 && state!=lastState){
+            if (out == OUTOP.ALL){
+                for (NeuralNode n : outputNodes) {
                     n.update();
-                    break;
                 }
+            } else if (out == OUTOP.ONE){
+                int r = rand.nextInt(totalValue);
+                for (NeuralNode n : outputNodes){
+                    r -= outWeights.get(n);
+                    if (r<=0) {
+                        n.update();
+                        break;
+                    }
+                }
+            } else if (out == OUTOP.ANY){
+                // TODO output any
             }
-        } else if (out == OUTOP.ANY){
-            // TODO output any
+            lastState = state;
         }
     }
     
@@ -162,6 +174,7 @@ public class NeuralNode {
                 case "CD": 
                     in = INOP.AND; out = OUTOP.ANY; inverse = true;
                     break;
+                // TODO add some arithmatic operations
                 default:
                     in = INOP.OR; out = OUTOP.ALL; inverse = false;
             }
@@ -181,6 +194,27 @@ public class NeuralNode {
     
     public void setState(int state){
         this.state = state;
-        this.updateOutputs();
+    }
+    public void setIDWeak(String s){
+        if (id==null){
+            id = s;
+        } else {
+            id = s + " ("+id+")";
+        }
+    }
+    public void setID(String s){
+        id = s;
+    }
+    public String getID(){
+        return id;
+    }
+    
+    @Override
+    public String toString(){
+        String s = id + "\t["+in.name()+", "+out.name()+", "+inverse+"]";
+        for (NeuralNode n : outputNodes){
+            s+="\n-->"+n.getID();
+        }
+        return s;
     }
 }

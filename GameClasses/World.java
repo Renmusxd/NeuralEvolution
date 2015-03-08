@@ -32,9 +32,9 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         
         private int view_Xoffset;
         private int view_Yoffset;
+        
+        private Bact selBact;
     
-	
-        @SuppressWarnings("LeakingThisInConstructor")
 	public World(WorldController wc) {
             myWorldController = wc;
             myWorldController.getGameWindow().addKeyListener(this);
@@ -51,7 +51,12 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             bactDrawArray = new ArrayList<>();
             bactDrawRemoveArray = new ArrayList<>();
 
-            this.addBact(new Bact(100,100,0));
+            Bact b = new Bact(100,100,0);
+            this.addBact(b);
+            b = new Bact(200,200,0);
+            this.addBact(b);
+            System.out.println(b.toString());
+            
 	}
 
 	@Override
@@ -64,6 +69,9 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                  */
                 if (true){
                     b.draw(g,this.view_Xoffset, this.view_Yoffset);
+                    if (b.equals(selBact)){
+                        g.drawOval(b.getMov().getX()+view_Xoffset-10, b.getMov().getY()+view_Yoffset-10,20 ,20);
+                    }
                 }
             }
             this.bactDrawArray.addAll(this.bactDrawAddArray);
@@ -82,7 +90,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
 	}
 
 	@Override
-	public void update() { // please keep in mind this can be multithreaded with the graphics, disable if needed
+	public void update() {
             NeuralThreader.updateNetworks(bactArray);
             for (Bact b : bactArray){
                 b.update();
@@ -91,6 +99,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                     bactDrawRemoveArray.add(b);
                 }
             }
+            // TODO add dead bact remains
             this.bactArray.addAll(this.bactAddArray);
             this.bactAddArray.clear();
             this.bactArray.removeAll(this.bactRemoveArray);
@@ -108,7 +117,21 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         
 	// -------------------------------------------------------------------- KEYBOARD, COMPONENT, AND MOUSE EVENTS -------------------------------------------------
 	@Override
-	public void mouseClicked(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {
+            int x = e.getX();
+            int y = e.getY();
+            x = x - this.view_Xoffset;
+            y = y - this.view_Yoffset;
+            Bact[] bs = bactArray.toArray(new Bact[0]);
+            int min_x = Math.abs(bs[0].getMov().getX()-x);
+            int min_y = Math.abs(bs[0].getMov().getY()-y);
+            for (Bact b : bs){
+                if (Math.abs(b.getMov().getX()-x)<=min_x &&
+                        Math.abs(b.getMov().getY()-y)<=min_y){
+                    this.selBact = b;
+                }
+            }
+        }
 	@Override
 	public void mouseEntered(MouseEvent e) {}
 	@Override
