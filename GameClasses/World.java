@@ -3,6 +3,7 @@ package NeuralEvolution.GameClasses;
 import NeuralEvolution.BodyClasses.Bact;
 import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.SpecificGameClasses.Map;
+import NeuralEvolution.SpecificGameClasses.Mutator;
 import NeuralEvolution.SpecificGameClasses.NeuralThreader;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
@@ -47,7 +48,11 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         
         private final int MIN_POP = 10;
         
-        // TODO grazing squares
+        private final int food_size = 10;
+        private final int[][] grazingsquares;
+        private final int default_grass = 100;
+        
+        private final int[][] meatsquares;
     
 	public World(WorldController wc) {
             myWorldController = wc;
@@ -69,18 +74,51 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             WINDOW_Y = wc.getGameWindow().HEIGHT;
             XBOUND = WINDOW_X;
             YBOUND = WINDOW_Y;
+            
+            grazingsquares = new int[XBOUND/food_size][YBOUND/food_size];
+            meatsquares = new int[XBOUND/food_size][YBOUND/food_size];
+            for (int i = 0; i<grazingsquares.length; i++)
+                for (int j = 0; j<grazingsquares.length; j++)
+                    grazingsquares[i][j] = default_grass;
 	}
-
+        
+        Incrementor leftText = new Incrementor(10,10);
+        Incrementor rightText = new Incrementor(10,10);
 	@Override
 	public void draw(Graphics2D g) { // please keep in mind this can be multithreaded with the updates, disable if needed
-            myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
+            //myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
+            // Draw selbact stuff first to avoid if statement inside loop
+            double alpha = 0;
+            for (int j = 0; j<grazingsquares[0].length; j++)
+                for (int i = 0; i<grazingsquares.length; i++){
+                    alpha = grazingsquares[i][j]/(double)default_grass;
+                    g.setColor(new Color(
+                            (int)(155 + alpha * (55-155)),
+                            (int)(118 + alpha*(125-118)),
+                            (int)(83 + alpha*(55-83)))
+                    );
+                    g.fillRect(i*food_size+view_Xoffset, j*food_size-view_Yoffset, food_size, food_size);
+                    if (meatsquares[i][j]>0){
+                        g.setColor(Color.PINK);
+                        g.fillOval(i*food_size+view_Xoffset+food_size/4, j*food_size-view_Yoffset+food_size/4, food_size/2, food_size/2);
+                    }
+            }
             
-// Draw selbact stuff first to avoid if statement inside loop
+            for (Bact b : longest){
+                if (b!=null && b.isAlive()){
+                    g.setColor(Color.YELLOW);
+                    g.drawOval(b.getMov().getX()+view_Xoffset-10, b.getMov().getY()+view_Yoffset-10,20 ,20);
+                    break;
+                }
+            }
+            
             if (selBact!=null){
                 g.setColor(Color.RED);
                 g.drawOval(selBact.getMov().getX()+view_Xoffset-10, selBact.getMov().getY()+view_Yoffset-10,20 ,20);
                 // Anything else        
             }
+            
+            
             for (Bact b : bactDrawArray){
                 /**
                  * If bacteria is at all visible, draw it, else don't
@@ -95,17 +133,30 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             this.bactDrawArray.removeAll(this.bactDrawRemoveArray);
             this.bactDrawRemoveArray.clear();
             if (this.debug){
+                leftText.clear();
+                rightText.clear();
                 g.setColor(Color.black);
-                g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, 10);
-                g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, 30);
+                g.drawString("update fps: "+Math.round(this.myWorldController.u_fps), 0, leftText.getInc());
+                g.drawString("graphics fps: "+Math.round(this.myWorldController.g_fps), 0, leftText.getInc());
                 if (this.paused){
                         g.setColor(Color.red);
-                        g.drawString("PAUSED", WindowWidth - 50, 10);
+                        g.drawString("PAUSED", WindowWidth/2, 10);
                 }
+                g.drawString("Pop:    "+bactArray.size(), 0, leftText.getInc());
                 if (this.selBact!=null){
-                    g.drawString("Id:     "+selBact.getID(),0,50);
-                    g.drawString("Hunger: "+selBact.getHunger(),0,70);
-                    g.drawString("Health: "+selBact.getHealth(),0,90);
+                    g.drawString("Id:     "+selBact.getID(),0,leftText.getInc());
+                    g.drawString("Parent: "+selBact.getParent(),0,leftText.getInc());
+                    g.drawString("Age:    "+selBact.getAge(), 0, leftText.getInc());
+                    g.drawString("Hunger: "+selBact.getHunger(),0,leftText.getInc());
+                    g.drawString("Health: "+selBact.getHealth(),0,leftText.getInc());
+                    g.drawString("Metab:  "+selBact.getMetabolism(),0,leftText.getInc());
+                    g.drawString("Speed:  "+(Math.floor((selBact.getMovSpeed()*10))/10.0),0,leftText.getInc());
+                }
+                for (Bact b : longest){
+                    if (b!=null){
+                        g.drawString("Id:  "+b.getID(), this.WindowWidth-70, rightText.getInc());
+                        g.drawString("Age: "+b.getAge(),this.WindowWidth-70, rightText.getInc());
+                    }
                 }
             }
 	}
@@ -115,6 +166,12 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
 	@Override
 	public void update() {
             if (!paused){
+                for (int j = 0; j<grazingsquares[0].length; j++){
+                    for (int i = 0; i<grazingsquares.length; i++){
+                        this.grazingsquares[i][j] = (grazingsquares[i][j]>=default_grass)?
+                                default_grass : grazingsquares[i][j]+1;
+                    }
+                }
                 NeuralThreader.updateNetworks(bactArray);
                 for (Bact b : bactArray){
                     b.update();
@@ -133,32 +190,75 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                     }
                     // Get some of the longest for repopulation
                     for (int i = 0; i<longest.length; i++){
-                        if (longest[i]==null || b.getAge()>longest[i].getAge()){
+                        if (longest[i]==null || b.getAge()>=longest[i].getAge()){
+                            // TODO fix
+                            for (int j = longest.length-1; j>i; j--){
+                                longest[j] = longest[j-1];
+                            }
                             longest[i] = b;
                             break;
                         }
                     }
                 }
+                for (Bact b : bactRemoveArray){
+                    int x = b.getMov().getX() / food_size;
+                    int y = b.getMov().getY() / food_size;
+                    this.meatsquares[x][y] = (b.getHunger()>0)?b.getHunger():0;
+                    this.meatsquares[x][y] = 1;
+                }
                 this.bactArray.removeAll(this.bactRemoveArray);
                 this.bactRemoveArray.clear();
-                // TODO add dead bact remains
                 this.bactArray.addAll(this.bactAddArray);
                 this.bactAddArray.clear();
                 // Repopulate
                 if (bactArray.size()<MIN_POP){
+                    int before = bactAddArray.size();
+                    System.out.println("[!] Repopulating: Pop="+bactArray.size());
                     for (Bact b : longest){
                         if (b!=null) {
                             Gene[] newGenes = b.getDNA();
-                            Bact newb = new Bact(r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),newGenes);
-                            System.out.println(newb.getMov().getX()+":"+newb.getMov().getY());
-                            this.addBact(newb);
+                            newGenes = Mutator.swap(newGenes, 1.0/newGenes.length);
+                            newGenes = Mutator.changeBase(newGenes, 1.0/Bact.dnalength(newGenes));
+                            Bact newb1 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),newGenes,b.getID());
+                            Bact newb2 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),newGenes,b.getID());
+                            Bact newb3 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),newGenes,b.getID());
+                            this.addBact(newb1);this.addBact(newb2);this.addBact(newb3);
                         }
                     }
-                    this.addBact(new Bact(r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360)));
+                    Bact randB1 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),-1);
+                    Bact randB2 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),randB1.getDNA(),-1);
+                    Bact randB3 = new Bact(this,r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),randB1.getDNA(),-1);
+                    this.addBact(randB1); this.addBact(randB2); this.addBact(randB3);
+                    System.out.println("\tAdded "+(bactAddArray.size()-before)+" bacts");
                 }
             }
 	}
-	
+        
+        public int eatGrass(int x,int y, int maxamount){
+            int newx = x/food_size;
+            int newy = y/food_size;
+            if (grazingsquares[newx][newy]>maxamount){
+                grazingsquares[newx][newy] -= maxamount;
+                return maxamount;
+            } else {
+                int t = grazingsquares[newx][newy];
+                grazingsquares[newx][newy] = 0;
+                return t;
+            }
+        }
+        public int eatMeat(int x,int y, int maxamount){
+            int newx = x/food_size;
+            int newy = y/food_size;
+            if (meatsquares[newx][newy]>maxamount){
+                meatsquares[newx][newy] -= maxamount;
+                return maxamount;
+            } else {
+                int t = meatsquares[newx][newy];
+                meatsquares[newx][newy] = 0;
+                return t;
+            }
+        }
+        
         public void addBact(Bact b){
             this.bactAddArray.add(b);
             this.bactDrawAddArray.add(b);
@@ -167,6 +267,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             this.bactRemoveArray.add(b);
             this.bactDrawRemoveArray.add(b);
         }
+        
         
 	// -------------------------------------------------------------------- KEYBOARD, COMPONENT, AND MOUSE EVENTS -------------------------------------------------
 	@Override
@@ -184,6 +285,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                     min_dist = d;
                 }
             }
+            System.out.println(selBact);
         }
 	@Override
 	public void mouseEntered(MouseEvent e) {}
@@ -224,4 +326,24 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
 	
 	public int getWindowHeight(){return this.WindowHeight;}
 	public int getWindowWidth(){return this.WindowWidth;}
+        
+        // -------------------------------------------------------------------- PRIVATE CLASSES -----------------------------------------------------------------------
+        private class Incrementor{
+            int base = 0;
+            int val = 0;
+            int i = 0;
+            public Incrementor(int base,int amount){
+                this.base = base;
+                this.val = base;
+                this.i = amount;
+            }
+            public int getInc(){
+                int t = val;
+                val += i;
+                return t;
+            }
+            public void clear(){
+                val = base;
+            }
+        }
 }

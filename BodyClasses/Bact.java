@@ -1,5 +1,6 @@
 package NeuralEvolution.BodyClasses;
 
+import NeuralEvolution.GameClasses.World;
 import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
 import NeuralEvolution.NeuronClasses.NeuralNode;
 import NeuralEvolution.SpecificGameClasses.Gene;
@@ -30,10 +31,14 @@ public class Bact {
     public static int ID_GLOBAL = 1;
     private int id;
     
+    private int parent;
+    
     public final static int MAX_HUNGER = 2400; // Two minutes at 1hunger/tick
     public final static int MAX_HEALTH = 100;
     
-    public Gene[] DNA;
+    private World w;
+    
+    private Gene[] DNA;
     
     private NeuralNetworkManager nnm;
     //Traits
@@ -41,6 +46,11 @@ public class Bact {
                 vegEnzymeProduction, 
                 mutationFrequency,
                 speed;
+    // Calculated values
+    private double  mov_speed,
+                    mutationRate;
+    private int     metabolism;
+        
     // Physical Variables
     private Movement pos;
     private final int drawSize = 10;
@@ -55,7 +65,8 @@ public class Bact {
     private NeuralNode  leftWheel,
                         rightWheel,
                         mouthExtend,
-                        eat;
+                        eatG,
+                        eatM;
     private NeuralNode[][][] sight; // [0->red 1->green 2->blue][x][y]
     private NeuralNode[][] touch;
     private NeuralNode hungerNode;
@@ -63,14 +74,17 @@ public class Bact {
     private NeuralNode lastLWheel;
     private NeuralNode lastRWheel;
     private NeuralNode lastMouthX;
-    private NeuralNode lastEat;
+    private NeuralNode lastEatG;
+    private NeuralNode lastEatM;
     
-    public Bact(int x, int y, int theta){
-        this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
+    public Bact(World w, int x, int y, int theta, int parent){
+        this(w, x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH),parent);
     }
-    public Bact(int x, int y, int theta,Gene[] DNA){
+    public Bact(World w, int x, int y, int theta,Gene[] DNA, int parent){
         this.id = ++ID_GLOBAL;
+        this.parent = parent;
         this.DNA = DNA;
+        this.w = w;
         this.parseDNA(DNA);
         nnm = new NeuralNetworkManager(this);
         pos = new Movement(x,y,theta);
@@ -82,12 +96,14 @@ public class Bact {
             leftWheel = new NeuralNode("LWheel",true);
             rightWheel = new NeuralNode("RWheel",true);
             mouthExtend = new NeuralNode("Mouth",true);
-            eat = new NeuralNode("Eat",true);
+            eatG = new NeuralNode("Eatg",true);
+            eatM = new NeuralNode("Eatm",true);
 
             nnm.registerNode(leftWheel);
             nnm.registerNode(rightWheel);
             nnm.registerNode(mouthExtend);
-            nnm.registerNode(eat);
+            nnm.registerNode(eatG);
+            nnm.registerNode(eatM);
         
         // Add input nodes
             // Always on
@@ -124,11 +140,13 @@ public class Bact {
             lastLWheel = new NeuralNode("LastLW",false);
             lastRWheel = new NeuralNode("LastRW",false);
             lastMouthX = new NeuralNode("LastMX",false);
-            lastEat = new NeuralNode("LastEat",false);
+            lastEatG = new NeuralNode("LastEatG",false);
+            lastEatM = new NeuralNode("LastEatM",false);
             nnm.registerInputNode(lastLWheel);
             nnm.registerInputNode(lastRWheel);
             nnm.registerInputNode(lastMouthX);
-            nnm.registerInputNode(lastEat);
+            nnm.registerInputNode(lastEatG);
+            nnm.registerInputNode(lastEatM);
         
         // Now add stuff from DNA
         nnm.parseDNA(DNA);
@@ -165,23 +183,36 @@ public class Bact {
         int leftWheelVal = leftWheel.getState();
         int rightWheelVal = rightWheel.getState();
         int mouthExtendState = mouthExtend.getState();
-        int eatState = eat.getState();
+        int eatGState = eatG.getState();
+        int eatMState = eatM.getState();
         // Update position
-        double movSpeed = speed;
         if (leftWheelVal!=0 && rightWheelVal!=0){
-            pos.forward(movSpeed);
+            pos.forward(mov_speed);
         } else if (leftWheelVal!=0){
-            pos.forward(movSpeed/2.0);
-            pos.addTheta(-0.5);
+            pos.forward(mov_speed/2.0);
+            pos.addTheta(-2);
         } else if (rightWheelVal!=0){
-            pos.forward(movSpeed/2.0);
-            pos.addTheta(0.5);
+            pos.forward(mov_speed/2.0);
+            pos.addTheta(2);
         }
         // TODO Calculate damage
         
-        // TODO Eat food
+        // Eat food
+        if (eatGState!=0 || eatMState!=0)
+            System.out.println("trying to eat");
+        if (eatGState>0){
+            int eaten = w.eatGrass(pos.getX(), pos.getY(), eatGState);
+            hunger +=(int)( eaten * this.vegEnzymeProduction / (double)
+                    (this.meatEnzymeProduction + this.vegEnzymeProduction));
+        }
+        if (eatMState>0){
+            int eaten = w.eatMeat(pos.getX(), pos.getY(), eatGState);
+            hunger +=(int)( eaten * this.meatEnzymeProduction / (double)
+                    (this.meatEnzymeProduction + this.vegEnzymeProduction));
+        }
         
-        // TODO remove hunger based on speed and traits
+        // Remove hunger based on speed and traits
+        this.hunger -= this.metabolism;
         
         // Set node states for next time
         hungerNode.setState(this.hunger);
@@ -190,8 +221,10 @@ public class Bact {
         lastLWheel.setState(leftWheel.getState());
         lastRWheel.setState(rightWheel.getState());
         lastMouthX.setState(mouthExtend.getState());
-        lastEat.setState(eat.getState());
-            // TODO sight and tactile
+        lastEatG.setState(eatG.getState());
+        lastEatM.setState(eatM.getState());
+        
+        // TODO sight and tactile
     }
     
     public boolean isAlive(){
@@ -229,6 +262,9 @@ public class Bact {
         } else {
             drawColor = Color.BLACK;   
         }
+        this.mov_speed = 1.0 + ((double)speed / (10.0*Bact.dnalength(DNA)));
+        this.mutationRate = (1.0 + mutationFrequency)/(Bact.dnalength(DNA));
+        this.metabolism = (int)Math.round( (DNA.length * 10)/(Bact.dnalength(DNA)) + this.mov_speed);
     }
     
     private static int convertGeneticsToInt(String gene){
@@ -242,14 +278,21 @@ public class Bact {
         return total;
     }
     
+    public static int dnalength(Gene[] a){
+            int s = 0;
+            for (Gene g : a)
+                s+=g.getGene().length();
+            return s;
+    }
+    
     public void draw(Graphics2D g, int xoffset, int yoffset){
         int x = pos.getX();
         int y = pos.getY();
         g.setColor(drawColor);
         g.fillOval(x+xoffset-drawSize/2, y+yoffset-drawSize/2, drawSize, drawSize);
         g.setColor(Color.BLACK);
-        int linex = (int)Math.round(pos.getX()+drawSize*Math.cos(180.0*pos.getTheta()/Math.PI));
-        int liney = (int)Math.round(pos.getY()+drawSize*Math.sin(180.0*pos.getTheta()/Math.PI));
+        int linex = (int)Math.round(pos.getX()+drawSize*Math.cos(Math.PI*pos.getTheta()/180.0));
+        int liney = (int)Math.round(pos.getY()+drawSize*Math.sin(Math.PI*pos.getTheta()/180.0));
         g.drawLine(x, y, linex, liney);
         //g.drawString(""+id, x-drawSize/2, y-drawSize/2);
     }
@@ -301,7 +344,6 @@ public class Bact {
             }
             botViewPos++;
         }
-        System.out.println(traits+" "+neurons+" "+paths);
         return genes.toArray(new Gene[0]);
     }
     
@@ -322,5 +364,8 @@ public class Bact {
     public String toString(){return "Bact: "+nnm.toString();}
     public int getHunger(){return hunger;}
     public int getHealth(){return health;}
+    public int getMetabolism(){return metabolism;}
+    public double getMovSpeed(){return mov_speed;}
     public int getID(){return id;}
+    public int getParent(){return parent;}
 }

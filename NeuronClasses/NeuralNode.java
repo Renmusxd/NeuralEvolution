@@ -14,7 +14,7 @@ public class NeuralNode {
     private static final Random rand = new Random();
     
     public enum INOP{
-        AND, OR;
+        AND, OR, EQ, LT, DLATCH, ADD, SUB;
     }
     public enum OUTOP{
         ANY,ONE,ALL;
@@ -26,6 +26,7 @@ public class NeuralNode {
     private boolean inverse;
     
     private int state = 0;
+    int lastState = 0;
     
     private final ArrayList<NeuralNode> inputNodes;
     private final ArrayList<NeuralNode> outputNodes;
@@ -70,7 +71,7 @@ public class NeuralNode {
         updates++;
         if (updates<=inputNodes.size() && acceptsInput){
             int newstate = 0;
-            if (in == INOP.AND){
+            if (in == INOP.AND && inputNodes.size()>0){
                 newstate = inputNodes.get(0).getState();
                 for (NeuralNode n : inputNodes){
                     int t = n.getState();
@@ -87,6 +88,31 @@ public class NeuralNode {
                         newstate = n.getState();
                     }
                 }
+            } else if (in == INOP.EQ && inputNodes.size()>0){ // All equal
+                newstate = 1;
+                int v = this.inputNodes.get(0).getState();
+                for (NeuralNode n : inputNodes)
+                    if (n.getState()!=v){newstate=0;break;}
+            } else if (in == INOP.LT && inputNodes.size()>0){ // In ascending order
+                newstate = 1;
+                int v = this.inputNodes.get(0).getState()-1; // So first checks out
+                for (NeuralNode n : inputNodes)
+                    if (n.getState()<=v){newstate=0;break;}
+                    else {v = n.getState();}
+            } else if (in == INOP.DLATCH && inputNodes.size()>0){ // Or if active, else hold
+                boolean isActive = (inputNodes.get(0).getState()!=0);
+                if (isActive){
+                    for (NeuralNode n : inputNodes.subList(1,inputNodes.size())){
+                        if (n.getState()>newstate){
+                            newstate = n.getState();
+                        }
+                    }   
+                } else {
+                    newstate = lastState;
+                }
+            } else if (in == INOP.ADD){ // sum
+                for (NeuralNode n : inputNodes)
+                    newstate += n.getState();
             }
             if (inverse){
                 // Inverse can only output boolean
@@ -97,8 +123,7 @@ public class NeuralNode {
             this.updateOutputs();
         }
     }
-    
-    int lastState = 0;
+
     /** 
      * Chooses which nodes to poke when values are updated 
      * Only updates output if there have been changes.
@@ -174,7 +199,14 @@ public class NeuralNode {
                 case "CD": 
                     in = INOP.AND; out = OUTOP.ANY; inverse = true;
                     break;
-                // TODO add some arithmatic operations
+                case "DA":
+                    in = INOP.EQ; // Other values don't matter
+                case "DB":
+                    in = INOP.LT;
+                case "DC":
+                    in = INOP.DLATCH;
+                case "DD":
+                    in = INOP.ADD;
                 default:
                     in = INOP.OR; out = OUTOP.ALL; inverse = false;
             }

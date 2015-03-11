@@ -42,7 +42,7 @@ public class WorldController { // A multithread compatible update and graphics l
 		final double G_TIME_BETWEEN_UPDATES = A_BILLION / GAME_G_GHERTZ;
 		final double U_TIME_BETWEEN_UPDATES = A_BILLION / GAME_U_GHERTZ;
 		double lastupdateTime = System.nanoTime();
-		double now = System.nanoTime();
+		double now;
 		
 		// makes basic updatable and drawable object 
 		this.myWorld = new World(this);

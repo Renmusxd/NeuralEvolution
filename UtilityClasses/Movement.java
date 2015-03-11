@@ -6,6 +6,12 @@ package NeuralEvolution.UtilityClasses;
  */
 public class Movement {
     private double x,y,theta;
+    /**
+     * Position and motion tracker
+     * @param x
+     * @param y
+     * @param theta in degrees
+     */
     public Movement(int x, int y, int theta){
         this.x = x;
         this.y = y;
@@ -16,7 +22,8 @@ public class Movement {
      * @param val 
      */
     public void forward(double val){
-        
+        this.x = this.x + val*Math.cos(Math.PI*this.theta/180);
+        this.y = this.y + val*Math.sin(Math.PI*this.theta/180);
     }
     public void add(Movement m){
         this.x+=m.getX();

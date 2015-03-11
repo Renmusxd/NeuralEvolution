@@ -70,8 +70,10 @@ public class Mutator {
         ArrayList<Gene> newGene = new ArrayList<>(Arrays.asList(a));
         ArrayList<Gene> addedGenes = new ArrayList<>();
         ArrayList<Gene> removedGenes = new ArrayList<>();
-        double continueFreq = (newGene.size()*mutFreq)/(newGene.size()*mutFreq + 1);
-        while (r.nextDouble()<continueFreq){
+        double continueFreq = 
+                (newGene.size()*mutFreq)/
+                (1 + newGene.size()*mutFreq);
+        while (r.nextDouble()<=continueFreq){
             Gene selGene = a[r.nextInt(a.length)];
             switch(r.nextInt(3)){
                 case 0: addedGenes.add(selGene); break;
@@ -96,12 +98,13 @@ public class Mutator {
             s.append(g.getGene());
         char[] newDNA = s.toString().toCharArray();
         // Make changes
-        double continueFreq = (newDNA.length*mutFreq)/(newDNA.length*mutFreq + 1);
-        while (r.nextDouble()<continueFreq){
+        double continueFreq = 
+                (newDNA.length*mutFreq)/
+                (1 + newDNA.length*mutFreq);
+        while (r.nextDouble()<=continueFreq){
             newDNA[r.nextInt(newDNA.length)] = 
                     Bact.ALPHABET.charAt(r.nextInt(Bact.ALPHABET.length()));
         }
-        
         return Bact.makeGenesFromString(new String(newDNA));
     }
 }
