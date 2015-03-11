@@ -1,8 +1,10 @@
 package NeuralEvolution.GameClasses;
 
 import NeuralEvolution.BodyClasses.Bact;
+import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.SpecificGameClasses.Map;
 import NeuralEvolution.SpecificGameClasses.NeuralThreader;
+import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -13,20 +15,28 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Random;
 
 public final class World implements Updatable, Drawable, KeyListener, MouseListener, ComponentListener { // The main world for objects to roam free
 
-	private WorldController myWorldController;
+        private final Random r = new Random();
+        private int XBOUND = 500;
+        private int YBOUND = 500;
+        
+        private final int WINDOW_X;
+        private final int WINDOW_Y;
+    
+	private final WorldController myWorldController;
         
         private boolean paused;
-        private boolean debug = true;
-	private Map myMap;
-        private ArrayList<Bact> bactAddArray;
-        private ArrayList<Bact> bactArray;
-        private ArrayList<Bact> bactRemoveArray;
-        private ArrayList<Bact> bactDrawAddArray;
-        private ArrayList<Bact> bactDrawArray;
-        private ArrayList<Bact> bactDrawRemoveArray;
+        private final boolean debug = true;
+	private final Map myMap;
+        private final ArrayList<Bact> bactAddArray;
+        private final ArrayList<Bact> bactArray;
+        private final ArrayList<Bact> bactRemoveArray;
+        private final ArrayList<Bact> bactDrawAddArray;
+        private final ArrayList<Bact> bactDrawArray;
+        private final ArrayList<Bact> bactDrawRemoveArray;
 	private int WindowWidth;
 	private int WindowHeight;
         
@@ -34,6 +44,10 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         private int view_Yoffset;
         
         private Bact selBact;
+        
+        private final int MIN_POP = 10;
+        
+        // TODO grazing squares
     
 	public World(WorldController wc) {
             myWorldController = wc;
@@ -51,17 +65,22 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             bactDrawArray = new ArrayList<>();
             bactDrawRemoveArray = new ArrayList<>();
 
-            Bact b = new Bact(100,100,0);
-            this.addBact(b);
-            b = new Bact(200,200,0);
-            this.addBact(b);
-            System.out.println(b.toString());
-            
+            WINDOW_X = wc.getGameWindow().WIDTH;
+            WINDOW_Y = wc.getGameWindow().HEIGHT;
+            XBOUND = WINDOW_X;
+            YBOUND = WINDOW_Y;
 	}
 
 	@Override
 	public void draw(Graphics2D g) { // please keep in mind this can be multithreaded with the updates, disable if needed
             myMap.draw(g);  // myMap draws based on myMap.setViewPosition(x,y) last entry, make sure to update
+            
+// Draw selbact stuff first to avoid if statement inside loop
+            if (selBact!=null){
+                g.setColor(Color.RED);
+                g.drawOval(selBact.getMov().getX()+view_Xoffset-10, selBact.getMov().getY()+view_Yoffset-10,20 ,20);
+                // Anything else        
+            }
             for (Bact b : bactDrawArray){
                 /**
                  * If bacteria is at all visible, draw it, else don't
@@ -69,9 +88,6 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                  */
                 if (true){
                     b.draw(g,this.view_Xoffset, this.view_Yoffset);
-                    if (b.equals(selBact)){
-                        g.drawOval(b.getMov().getX()+view_Xoffset-10, b.getMov().getY()+view_Yoffset-10,20 ,20);
-                    }
                 }
             }
             this.bactDrawArray.addAll(this.bactDrawAddArray);
@@ -86,24 +102,61 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                         g.setColor(Color.red);
                         g.drawString("PAUSED", WindowWidth - 50, 10);
                 }
+                if (this.selBact!=null){
+                    g.drawString("Id:     "+selBact.getID(),0,50);
+                    g.drawString("Hunger: "+selBact.getHunger(),0,70);
+                    g.drawString("Health: "+selBact.getHealth(),0,90);
+                }
             }
 	}
 
+        /* The four record holding longest living bacts */
+        Bact[] longest = new Bact[4];
 	@Override
 	public void update() {
-            NeuralThreader.updateNetworks(bactArray);
-            for (Bact b : bactArray){
-                b.update();
-                if (!b.isAlive()){
-                    bactRemoveArray.add(b);
-                    bactDrawRemoveArray.add(b);
+            if (!paused){
+                NeuralThreader.updateNetworks(bactArray);
+                for (Bact b : bactArray){
+                    b.update();
+                    Movement m = b.getMov();
+                    if (m.getX()>XBOUND)
+                        m.setX(XBOUND);
+                    else if (m.getX()<0)
+                        m.setX(0);
+                    if (m.getY()>YBOUND)
+                        m.setY(YBOUND);
+                    else if (m.getY()<0)
+                        m.setY(0);
+                    if (!b.isAlive()){
+                        bactRemoveArray.add(b);
+                        bactDrawRemoveArray.add(b);
+                    }
+                    // Get some of the longest for repopulation
+                    for (int i = 0; i<longest.length; i++){
+                        if (longest[i]==null || b.getAge()>longest[i].getAge()){
+                            longest[i] = b;
+                            break;
+                        }
+                    }
+                }
+                this.bactArray.removeAll(this.bactRemoveArray);
+                this.bactRemoveArray.clear();
+                // TODO add dead bact remains
+                this.bactArray.addAll(this.bactAddArray);
+                this.bactAddArray.clear();
+                // Repopulate
+                if (bactArray.size()<MIN_POP){
+                    for (Bact b : longest){
+                        if (b!=null) {
+                            Gene[] newGenes = b.getDNA();
+                            Bact newb = new Bact(r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360),newGenes);
+                            System.out.println(newb.getMov().getX()+":"+newb.getMov().getY());
+                            this.addBact(newb);
+                        }
+                    }
+                    this.addBact(new Bact(r.nextInt(XBOUND),r.nextInt(YBOUND),r.nextInt(360)));
                 }
             }
-            // TODO add dead bact remains
-            this.bactArray.addAll(this.bactAddArray);
-            this.bactAddArray.clear();
-            this.bactArray.removeAll(this.bactRemoveArray);
-            this.bactRemoveArray.clear();
 	}
 	
         public void addBact(Bact b){
@@ -123,12 +176,12 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             x = x - this.view_Xoffset;
             y = y - this.view_Yoffset;
             Bact[] bs = bactArray.toArray(new Bact[0]);
-            int min_x = Math.abs(bs[0].getMov().getX()-x);
-            int min_y = Math.abs(bs[0].getMov().getY()-y);
+            double min_dist = bs[0].getMov().dist(x, y);
             for (Bact b : bs){
-                if (Math.abs(b.getMov().getX()-x)<=min_x &&
-                        Math.abs(b.getMov().getY()-y)<=min_y){
+                double d = b.getMov().dist(x, y);
+                if (d<=min_dist){
                     this.selBact = b;
+                    min_dist = d;
                 }
             }
         }

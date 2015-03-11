@@ -27,6 +27,9 @@ public class Bact {
     public static final char    SPECIAL_PRIMER      = 'D';
     public final static int     DEFAULT_DNA_LENGTH  = 1000;
     
+    public static int ID_GLOBAL = 1;
+    private int id;
+    
     public final static int MAX_HUNGER = 2400; // Two minutes at 1hunger/tick
     public final static int MAX_HEALTH = 100;
     
@@ -46,6 +49,8 @@ public class Bact {
     private int hunger,
                 health;
     
+    private int age = 0;
+    
     // Nodes to listen too.
     private NeuralNode  leftWheel,
                         rightWheel,
@@ -64,6 +69,7 @@ public class Bact {
         this(x,y,theta,Bact.randomDNA(Bact.DEFAULT_DNA_LENGTH));
     }
     public Bact(int x, int y, int theta,Gene[] DNA){
+        this.id = ++ID_GLOBAL;
         this.DNA = DNA;
         this.parseDNA(DNA);
         nnm = new NeuralNetworkManager(this);
@@ -148,13 +154,14 @@ public class Bact {
      * the last update call.
      */
     public void update(){
+        age++;
         // Check what the neural network is up to if it hasn't been done
         if (!mapupdated){
             nnm.update();
         } else {
             mapupdated = false;
         }
-        // TODO check outputs and update stuff
+        // Check outputs and update stuff
         int leftWheelVal = leftWheel.getState();
         int rightWheelVal = rightWheel.getState();
         int mouthExtendState = mouthExtend.getState();
@@ -163,24 +170,20 @@ public class Bact {
         double movSpeed = speed;
         if (leftWheelVal!=0 && rightWheelVal!=0){
             pos.forward(movSpeed);
-            System.out.println("Moving");
         } else if (leftWheelVal!=0){
             pos.forward(movSpeed/2.0);
             pos.addTheta(-0.5);
-            System.out.println("Moving");
         } else if (rightWheelVal!=0){
             pos.forward(movSpeed/2.0);
             pos.addTheta(0.5);
-            System.out.println("Moving");
         }
-        
         // TODO Calculate damage
         
         // TODO Eat food
         
         // TODO remove hunger based on speed and traits
         
-        // TODO set node states for next time
+        // Set node states for next time
         hungerNode.setState(this.hunger);
         healthNode.setState(this.health);
         
@@ -188,6 +191,7 @@ public class Bact {
         lastRWheel.setState(rightWheel.getState());
         lastMouthX.setState(mouthExtend.getState());
         lastEat.setState(eat.getState());
+            // TODO sight and tactile
     }
     
     public boolean isAlive(){
@@ -222,7 +226,6 @@ public class Bact {
         float totalColor = totalRed+totalGreen+totalBlue;
         if (totalColor!=0){
             drawColor = new Color(totalRed/totalColor,totalGreen/totalColor,totalBlue/totalColor);
-            System.out.println(drawColor.toString());
         } else {
             drawColor = Color.BLACK;   
         }
@@ -245,9 +248,10 @@ public class Bact {
         g.setColor(drawColor);
         g.fillOval(x+xoffset-drawSize/2, y+yoffset-drawSize/2, drawSize, drawSize);
         g.setColor(Color.BLACK);
-        int linex = (int)Math.round(pos.getX()+drawSize*Math.cos(180*speed/Math.PI));
-        int liney = (int)Math.round(pos.getY()+drawSize*Math.sin(180*speed/Math.PI));
+        int linex = (int)Math.round(pos.getX()+drawSize*Math.cos(180.0*pos.getTheta()/Math.PI));
+        int liney = (int)Math.round(pos.getY()+drawSize*Math.sin(180.0*pos.getTheta()/Math.PI));
         g.drawLine(x, y, linex, liney);
+        //g.drawString(""+id, x-drawSize/2, y-drawSize/2);
     }
     
     public static Gene[] makeGenesFromString(String DNA){
@@ -311,12 +315,12 @@ public class Bact {
         return makeGenesFromString(DNA);
     }
     
-    public Movement getMov(){
-        return this.pos;
-    }
-    
+    public Movement getMov(){return this.pos;}
+    public Gene[] getDNA(){return DNA;}
+    public int getAge(){return age;}
     @Override
-    public String toString(){
-        return "Bact: "+nnm.toString();
-    }
+    public String toString(){return "Bact: "+nnm.toString();}
+    public int getHunger(){return hunger;}
+    public int getHealth(){return health;}
+    public int getID(){return id;}
 }

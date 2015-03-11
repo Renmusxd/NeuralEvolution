@@ -49,5 +49,11 @@ public class Movement {
     public void addTheta(double val){
         this.theta += val;
     }
+    public double dist(Movement m){
+        return dist(m.getX(),m.getY());
+    }
+    public double dist(double x, double y){
+        return Math.sqrt(Math.pow(this.x - x,2) + Math.pow(this.y - y,2));
+    }
     
 }
