@@ -10,11 +10,11 @@ import javax.swing.JPanel;
 
 public class GameWindow extends Canvas{	// A double buffered Canvas
 	private static final long serialVersionUID = 1L;
-	private Workhorse myWorkhorse;
-	private WorldController myWorldController;
-	private JFrame myFrame;
-	private JPanel myPanel;
-	private BufferStrategy strategy;
+	private final Workhorse myWorkhorse;
+	private final WorldController myWorldController;
+	private final JFrame myFrame;
+	private final JPanel myPanel;
+	private final BufferStrategy strategy;
 	public final int HEIGHT = 750;
 	public final int WIDTH = 750;
 	public GameWindow(Workhorse myWH){

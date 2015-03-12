@@ -1,5 +1,7 @@
 package NeuralEvolution.GameClasses;
 
+import NeuralEvolution.SpecificGameClasses.NeuronWindow;
+
 public class Workhorse {
 
 	public final boolean MULTICORE = true; // will run in multiple cores if the option is available, cannot be changed in-game
@@ -8,10 +10,12 @@ public class Workhorse {
 	
 	public WorldController wc;
 	public GameWindow gw;
+        public NeuronWindow nw;
 	
 	public Workhorse() {
             wc = new WorldController(this);
             gw = new GameWindow(this);
+            nw = new NeuronWindow(this);
             Thread loop = new Thread() {
             public void run(){
                 System.out.println("Starting threaded loop");

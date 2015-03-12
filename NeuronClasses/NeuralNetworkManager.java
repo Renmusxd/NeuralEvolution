@@ -29,6 +29,8 @@ public final class NeuralNetworkManager implements Updatable {
     
     @Override
     public void update(){
+        for (NeuralNode n : nodeIDMap.values())
+            n.clear();
         for (NeuralNode n : inputNodes)
             n.updateOutputs();
     }
@@ -50,6 +52,10 @@ public final class NeuralNetworkManager implements Updatable {
     
     public String encodeNetwork(){
         return null;
+    }
+    
+    public void reward(int n){
+        
     }
 
     public void parseDNA(Gene[] DNA){

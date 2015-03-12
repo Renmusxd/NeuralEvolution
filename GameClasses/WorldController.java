@@ -37,7 +37,7 @@ public class WorldController { // A multithread compatible update and graphics l
 	public void loop(){
 		myGameWindow = myWorkhorse.getGameWindow();
 		// read prefs
-		final double GAME_U_GHERTZ = 20.0; // update frequency //also graphics for single core systems
+		final double GAME_U_GHERTZ = 40.0; // update frequency //also graphics for single core systems
 		final double GAME_G_GHERTZ = 60.0; // graphics frequency
 		final double G_TIME_BETWEEN_UPDATES = A_BILLION / GAME_G_GHERTZ;
 		final double U_TIME_BETWEEN_UPDATES = A_BILLION / GAME_U_GHERTZ;
@@ -128,6 +128,8 @@ public class WorldController { // A multithread compatible update and graphics l
 	
 	public void render(){
 		myGameWindow.drawWindow(); // gets graphics then calls drawAll // for now only window
+                // Added
+                this.myWorkhorse.nw.drawWindow();
 	}
 	public void drawAll(Graphics2D g){
 		drawObjects.addAll(addToDrawObjects);

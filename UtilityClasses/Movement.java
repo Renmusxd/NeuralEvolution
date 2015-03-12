@@ -12,7 +12,7 @@ public class Movement {
      * @param y
      * @param theta in degrees
      */
-    public Movement(int x, int y, int theta){
+    public Movement(double x, double y, double theta){
         this.x = x;
         this.y = y;
         this.theta = theta;
@@ -24,6 +24,11 @@ public class Movement {
     public void forward(double val){
         this.x = this.x + val*Math.cos(Math.PI*this.theta/180);
         this.y = this.y + val*Math.sin(Math.PI*this.theta/180);
+    }
+    public Movement makeAhead(double theta, double val){
+        double nx = this.x + val*Math.cos(Math.PI*(this.theta+theta)/180);
+        double ny = this.y + val*Math.sin(Math.PI*(this.theta+theta)/180);
+        return new Movement(nx,ny,0);
     }
     public void add(Movement m){
         this.x+=m.getX();
@@ -55,6 +60,8 @@ public class Movement {
     }
     public void addTheta(double val){
         this.theta += val;
+        if (theta<0) theta += 360;
+        if (theta>=360) theta -= 360;
     }
     public double dist(Movement m){
         return dist(m.getX(),m.getY());

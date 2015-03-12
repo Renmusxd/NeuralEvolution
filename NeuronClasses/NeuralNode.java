@@ -37,11 +37,27 @@ public class NeuralNode {
     /** Number of updates this cycle, limited to #inputs **/
     private byte updates;
     private boolean acceptsInput = true;
+    private boolean editableOp = true;
     
+    /**
+     * Makes a constant
+     * @param s
+     * @param v constant value
+     */
+    public NeuralNode(String s, int v){
+        this(s,false,false);
+        this.state = v;
+    }
+    public NeuralNode(String s, boolean acceptsInput, boolean editableoperation){
+        this();
+        id = s;
+        this.acceptsInput = acceptsInput;
+        editableOp = false;
+    }
     public NeuralNode(String s, boolean acceptsInput){
         this();
         id = s;
-        acceptsInput = false;
+        this.acceptsInput = acceptsInput;
     }
     public NeuralNode(){
         inputNodes = new ArrayList<>();
@@ -71,16 +87,16 @@ public class NeuralNode {
         updates++;
         if (updates<=inputNodes.size() && acceptsInput){
             int newstate = 0;
-            if (in == INOP.AND && inputNodes.size()>0){
+            if (in == INOP.AND && inputNodes.size()>0){ // Largest if all on
                 newstate = inputNodes.get(0).getState();
                 for (NeuralNode n : inputNodes){
                     int t = n.getState();
                     if (t==0){
                         newstate = 0;
                         break;
-                    } else if (newstate>t){
+                    } else if (newstate<t){
                         newstate = t;
-                    }
+                    } 
                 }
             } else if (in == INOP.OR){
                 for (NeuralNode n : inputNodes){
@@ -114,12 +130,7 @@ public class NeuralNode {
                 for (NeuralNode n : inputNodes)
                     newstate += n.getState();
             }
-            if (inverse){
-                // Inverse can only output boolean
-                this.setState((newstate!=0)?0:1);
-            } else {
-                this.setState(newstate);
-            }
+            this.setState(newstate);
             this.updateOutputs();
         }
     }
@@ -144,7 +155,11 @@ public class NeuralNode {
                     }
                 }
             } else if (out == OUTOP.ANY){
-                // TODO output any
+                for (NeuralNode n : outputNodes){
+                    if (rand.nextDouble()<(outWeights.get(n)/(double)totalValue)){
+                        n.update();
+                    }
+                }
             }
             lastState = state;
         }
@@ -160,7 +175,8 @@ public class NeuralNode {
     }
     
     public void setOperationString(String op){
-        // 12 Possibilities
+        if (!editableOp)
+            return;
         if (op.length()==2){
             switch (op){
                 case "AA":
@@ -207,8 +223,6 @@ public class NeuralNode {
                     in = INOP.DLATCH;
                 case "DD":
                     in = INOP.ADD;
-                default:
-                    in = INOP.OR; out = OUTOP.ALL; inverse = false;
             }
         }
     }
@@ -217,7 +231,12 @@ public class NeuralNode {
      * @return state
      */
     public int getState(){
-        return this.state;
+        if (inverse){
+            // Inverse can only output boolean
+            return (state==0)?1:0;
+        } else {
+            return state;
+        }
     }
 
     public void setInverse(boolean b){
@@ -239,6 +258,35 @@ public class NeuralNode {
     }
     public String getID(){
         return id;
+    }
+    public String opCode(){
+        String inopc = "";
+        switch (in){
+            case AND: inopc = "&";  break;
+            case OR: inopc = "|";   break;
+            case EQ: inopc = "=";   break;
+            case LT: inopc = "<";   break;
+            case DLATCH: inopc = "D";   break;
+            case ADD: inopc = "+";  break;
+            case SUB: inopc = "-";  break;
+        }
+        String outopc = "";
+        switch (out){
+            case ANY: outopc = "?";  break;
+            case ONE: outopc = "1";   break;
+            case ALL: outopc = "*";   break;
+        }
+        return (inverse?"!":"")+inopc+outopc;
+    }
+    
+    public boolean getAcceptsInput(){
+        return this.acceptsInput;
+    }
+    public ArrayList<NeuralNode> getInputs(){
+        return this.inputNodes;
+    }
+    public ArrayList<NeuralNode> getOutputs(){
+        return this.outputNodes;
     }
     
     @Override
