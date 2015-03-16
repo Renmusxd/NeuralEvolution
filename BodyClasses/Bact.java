@@ -9,6 +9,7 @@ import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -27,12 +28,14 @@ public class Bact {
     public static final char    NPATH_PRIMER        = 'C';
     public static final byte    NPATH_LENGTH        = 8; // [XXXX][XXXX] = [ID]-[ID]
     public static final char    SPECIAL_PRIMER      = 'D';
-    public final static int     DEFAULT_DNA_LENGTH  = 1000;
+    public final static int     DEFAULT_DNA_LENGTH  = 2000;
     
     public static int ID_GLOBAL = 1;
     private int id;
     
     private int parent;
+    
+    public final static int MAX_AGE = 10000;
     
     public final static int MAX_HUNGER = 2400; // Two minutes at 1hunger/tick
     public final static int MAX_HEALTH = 100;
@@ -58,11 +61,15 @@ public class Bact {
                     mateRewardAmount,
                     eatGRewardAmount,
                     eatMRewardAmount,
-                    sightRange;
+                    sightRange,       // Square sight distance
+                    red,
+                    blue,
+                    green;
         
     // Physical Variables
     private Movement pos;
-    private final int drawSize = 10;
+    private int size = 10;
+    private final int drawSize = size;
     private Color drawColor;
     
     private int hunger,
@@ -77,18 +84,26 @@ public class Bact {
                         eatG,
                         eatM,
                         replicate;
+    // For sight and touch
+    // 0,0 is in front and to the left of the bact
+    // 1,0 is directly in front
+    // 2,1 is in front and to the right
+    //...
+    private final BactInt[][] closests = new BactInt[3][3];
     private NeuralNode[][][] sight; // [0->red 1->green 2->blue][x][y]
     private NeuralNode[][] touch;
-    private NeuralNode hungerNode;
-    private NeuralNode healthNode;
-    private NeuralNode lastLWheel;
-    private NeuralNode lastRWheel;
-    private NeuralNode lastMouthX;
-    private NeuralNode lastEatG;
-    private NeuralNode lastEatM;
+    private NeuralNode  hungerNode,
+                        healthNode,
+                        lastLWheel,
+                        lastRWheel,
+                        lastMouthX,
+                        lastEatG,
+                        lastEatM,
+                        lastReplicate;
     
     private int lastThingSaid;
     private int agesaid;
+    
     public Bact(World w, int x, int y, int theta, Gene[] g,int parent,int initialhunger){
         this(w, x,y,theta,g,parent);
         hunger = initialhunger;
@@ -109,12 +124,12 @@ public class Bact {
         health = MAX_HEALTH;
         
         // Now add nodes for motion and stuff
-            leftWheel = new NeuralNode("LWheel",true,false);
-            rightWheel = new NeuralNode("RWheel",true,false);
-            mouthExtend = new NeuralNode("Mouth",true,false);
-            eatG = new NeuralNode("Eatg",true,false);
-            eatM = new NeuralNode("Eatm",true,false);
-            replicate = new NeuralNode("Repl",true,false);
+            leftWheel = new NeuralNode("LW",true,false);
+            rightWheel = new NeuralNode("RW",true,false);
+            mouthExtend = new NeuralNode("M",true,false);
+            eatG = new NeuralNode("Eg",true,false);
+            eatM = new NeuralNode("Em",true,false);
+            replicate = new NeuralNode("R",true,false);
 
             nnm.registerNode(leftWheel);
             nnm.registerNode(rightWheel);
@@ -126,8 +141,8 @@ public class Bact {
         // Add input nodes
             // Always on
             NeuralNode on = new NeuralNode("On",1);
-            NeuralNode maxhung = new NeuralNode("MaxHunger",MAX_HUNGER);
-            NeuralNode maxhealth = new NeuralNode("MaxHealth",MAX_HEALTH);
+            NeuralNode maxhung = new NeuralNode("MHu",MAX_HUNGER);
+            NeuralNode maxhealth = new NeuralNode("MHe",MAX_HEALTH);
             nnm.registerInputNode(on);
             nnm.registerInputNode(maxhung);
             nnm.registerInputNode(maxhealth);
@@ -137,7 +152,7 @@ public class Bact {
             for (int c=0; c<3; c++){
                 for (int i=0; i<3; i++){
                     for (int j=0; j<3; j++) {
-                        NeuralNode n = new NeuralNode("Eye "+cs[c]+""+i+""+j,false);
+                        NeuralNode n = new NeuralNode("I"+cs[c]+""+i+""+j,false);
                         sight[c][i][j] = n;
                         nnm.registerInputNode(n);
                     }
@@ -147,7 +162,7 @@ public class Bact {
             touch = new NeuralNode[3][3];
             for (int i=0; i<3; i++){
                 for (int j=0; j<3; j++) {
-                    NeuralNode n = new NeuralNode("Tch "+i+""+j,false);
+                    NeuralNode n = new NeuralNode("T"+i+""+j,false);
                     touch[i][j] = n;
                     nnm.registerInputNode(n);
                 }
@@ -163,26 +178,127 @@ public class Bact {
             lastMouthX = new NeuralNode("LastMX",false,false);
             lastEatG = new NeuralNode("LastEatG",false,false);
             lastEatM = new NeuralNode("LastEatM",false,false);
+            lastReplicate = new NeuralNode("LastRepl",false,false);
             nnm.registerInputNode(lastLWheel);
             nnm.registerInputNode(lastRWheel);
             nnm.registerInputNode(lastMouthX);
             nnm.registerInputNode(lastEatG);
             nnm.registerInputNode(lastEatM);
+            nnm.registerInputNode(lastReplicate);
         // Now add stuff from DNA
         nnm.parseDNA(DNA);
+    }
+    
+    
+    public class BactInt{
+        public Bact bact; public int dist2;
+        /**
+         * Holds a Bact and its squared distance
+         * @param b Bact
+         * @param d distance squared from host
+         */
+        public BactInt(Bact b, int d){bact=b;dist2=d;}
     }
     /**
      * Used to make more efficient collision detection O(nlogn) instead of O(n^2)
      * Report bact within distance
      * @param b - bact within range
      */
-    public void alertOfPresence(Bact b){
+    public void interact(Bact b){
+        if (this.equals(b)) return;
         // TODO alertbacts of others with sight
+        int x = pos.getX();
+        int y = pos.getY();
+        int bx = b.getMov().getX();
+        int by = b.getMov().getY();
         
+        double[] forwardVec = pos.getVec();
+        double[] perpVec = pos.getPerpVec();
         
+        double perp_dist =    (bx-x)*perpVec[0] + (by-y)*perpVec[1];
+        double forw_dist = (bx-x)*forwardVec[0] + (by-y)*forwardVec[1];
         
+        int perp_dir = (Math.abs(perp_dist)<=size/2)?
+                0:(int)Math.signum(perp_dist);
+        int for_dir = (Math.abs(forw_dist)<=size/2)?
+                0:(int)Math.signum(forw_dist);
         
+        int close_for_dir = (Math.abs(forw_dist)<=size/4)?
+                0:(int)Math.signum(forw_dist);
+        
+        for (int i = 0; i<closests.length; i++){
+            for (int j = 0; j<closests.length; j++) {
+                if (i == 1+perp_dir && j==1-for_dir){
+                    // Sight
+                    int d2 = (int)(Math.pow(bx-x,2)+Math.pow(by-y,2));
+                    boolean proceed = (closests[i][j]==null || closests[i][j].dist2>=d2);
+                    if (d2 <= this.sightRange && proceed){
+                        this.closests[i][j] = new BactInt(b,d2);
+                        this.sight[0][i][j].setState(b.getRed());
+                        this.sight[1][i][j].setState(b.getGreen());
+                        this.sight[2][i][j].setState(b.getBlue());
+                    }
+                    // Touch and Damage
+                    
+                    if (d2<=Math.pow(this.size,2)){
+                        touch[i][j].setState(1);
+                        if (mouthExtend.getState()>0 &&
+                                1+perp_dir==1 && 1-close_for_dir>=0){
+                            System.out.println("Attacking!");
+                            b.inflictDamage(75);
+                        }
+                    }
+                }
+            }
+        }
     }
+    
+    public void clearInteractions(){
+        for (int i=0; i<sight.length; i++){
+            Arrays.fill(closests[i],0,closests[i].length,null);
+            for (int j=0; j<sight.length; j++){
+                touch[i][j].setState(0);
+                sight[0][i][j].setState(0);
+                sight[1][i][j].setState(0);
+                sight[2][i][j].setState(0);
+            }
+        }
+    }
+    
+    public void seeFood(){
+        // Sight of Grass, Bacts only see the green of grass from 0 to 255
+        final int rotNum = (int)Math.round((pos.getTheta()+292.5)/45);
+        final int[][] rot = {{0,0},{0,1},{0,2},{1,2},{2,2},{2,1},{2,0},{1,0}};
+        // TODO fix
+        this.sight[1][1][1].setState(
+                255*w.getGrass(pos.getX(), pos.getY())/World.default_grass
+            );
+        if (w.getMeat(pos.getX(), pos.getY())>0)
+            this.sight[0][1][1].setState(255);
+        for (int i = 0; i<rot.length; i++){
+            int ix = rot[i][0];
+            int iy = rot[i][1];
+            int jx = rot[(i+rotNum)%rot.length][0];
+            int jy = rot[(i+rotNum)%rot.length][1];
+            int lookx = pos.getX() + (jx-1)*World.food_size;
+            int looky = pos.getY() + (jy-1)*World.food_size;
+            // TODO fix issue where this overwrites other vision and vice versa
+            // This is because this is updating for next time, and the inter bact
+            // vision is done possibly before and possibly after this update cycle
+            // Need to clear somehow
+            this.sight[1][ix][iy].setState(
+                    255*w.getGrass(lookx, looky)/World.default_grass
+                );
+            if (w.getMeat(lookx, looky)>0)
+                this.sight[0][ix][iy].setState(255);
+        }
+    }
+    
+    public void inflictDamage(int amount){
+      // TODO damage
+        health -= amount;
+    }
+    
     
     private boolean mapupdated = false;
     public void updateNeurons(){
@@ -202,11 +318,15 @@ public class Bact {
             nnm.update();
         } else {
             mapupdated = false;
-        }
+        }     
+        // Update from bottom (CHEATING);
+//        leftWheel.update(); rightWheel.update(); 
+//        eatG.update(); eatM.update();
+//        replicate.update(); mouthExtend.update();
+        
         // Check outputs and update stuff
         int leftWheelVal = leftWheel.getState();
         int rightWheelVal = rightWheel.getState();
-        int mouthExtendState = mouthExtend.getState();
         int eatGState = eatG.getState();
         int eatMState = eatM.getState();
         // Update position
@@ -231,7 +351,6 @@ public class Bact {
         } else if (rightWheelVal>0 && leftWheelVal<0){
             pos.addTheta(-4);
         }
-        // TODO Calculate damage
         
         // Eat food
         if (eatGState>0){
@@ -248,21 +367,10 @@ public class Bact {
             if (eaten!=0)
                 nnm.reward(eatMRewardAmount);
         }
-        if (hunger>MAX_HUNGER)
-                hunger = MAX_HUNGER;
+        if (hunger>MAX_HUNGER) hunger = MAX_HUNGER;
         // Hunger and Health
-        if (hunger-metabolism>0){
-            this.hunger -= this.metabolism;
-            if (health<MAX_HEALTH)
-                this.health += 1;
-            if (hunger<0)
-                hunger=0;
-        } else {
-            this.health -= this.metabolism - this.hunger;
-            this.hunger = 0;
-            if (health<0)
-                health = 0;
-        }
+        this.hunger -= this.metabolism;
+        if (health<MAX_HEALTH) this.health += 1;
         
         // Set node states for next time
         hungerNode.setState(this.hunger);
@@ -273,46 +381,20 @@ public class Bact {
         lastMouthX.setState(mouthExtend.getState());
         lastEatG.setState(eatG.getState());
         lastEatM.setState(eatM.getState());
+        lastReplicate.setState(replicate.getState());
         
-        // Sight of Grass, Bacts only see the green of grass from 0 to 255
-        final int rotNum = (int)Math.round((pos.getTheta()+22.5)/45);
-        final int[][] rot = {{0,0},{0,1},{0,2},{1,2},{2,2},{2,1},{2,0},{1,0}};
-        // TODO fix
-        this.sight[1][1][1].setState(
-                255*w.getGrass(pos.getX(), pos.getY())/World.default_grass
-            );
-        if (w.getMeat(pos.getX(), pos.getY())>0)
-            this.sight[0][1][1].setState(255);
-        for (int i = 0; i<rot.length; i++){
-            int ix = rot[i][0];
-            int iy = rot[i][1];
-            int jx = rot[(i+rotNum)%rot.length][0];
-            int jy = rot[(i+rotNum)%rot.length][1];
-            int lookx = pos.getX() + (jx-1)*World.food_size;
-            int looky = pos.getY() + (jx-1)*World.food_size;
-            this.sight[1][ix][iy].setState(
-                    255*w.getGrass(lookx, looky)/World.default_grass
-                );
-            if (w.getMeat(lookx, looky)>0)
-                this.sight[0][ix][iy].setState(255);
-        }
         // Replicate
-        if (replicate.getState()>0){
-            System.out.println(id+" trying to mate");
-            System.out.println("hunger: "+hunger);
-        }
-        if (replicate.getState()>0 && hunger>2*replicate.getState()){
+        if (replicate.getState()>0 && hunger>MAX_HEALTH+2*replicate.getState()){
             
             Gene[] newDNA = Mutator.swap(DNA, this.mutationRate);
-            System.out.println(DNA.length+":"+newDNA.length+":"+mutationRate);
             newDNA = Mutator.changeBase(newDNA, this.mutationRate);
             w.replBact(id,replicate.getState(),pos.getX(),pos.getY(),newDNA);
-            hunger -= replicate.getState();
+            hunger -= MAX_HEALTH+replicate.getState();
         }
     }
     
     public boolean isAlive(){
-        return health>0;
+        return (health>0 && hunger>0) || age>=MAX_AGE;
     }
     
     /**
@@ -337,14 +419,20 @@ public class Bact {
                         case "BB": this.mateReward            += delta; break;
                         case "BC": this.eatGReward            += delta; break;
                         case "BD": this.eatMReward            += delta; break;
+                        case "CA": this.sightVal              += delta; break;
                     }
                 }
             }
         }
         float totalColor = totalRed+totalGreen+totalBlue;
+        sightRange = sightVal;
         if (totalColor!=0){
-            drawColor = new Color(totalRed/totalColor,totalGreen/totalColor,totalBlue/totalColor);
+            red = (int)(255*totalRed/totalColor);
+            green = (int)(255*totalGreen/totalColor);
+            blue = (int)(255*totalBlue/totalColor);
+            drawColor = new Color(red,blue,green);
         } else {
+            red = green = blue = 0;
             drawColor = Color.BLACK;   
         }
         float totalReward = mateReward + eatGReward + eatMReward;
@@ -356,7 +444,7 @@ public class Bact {
             
         }
         this.mov_speed = 1.0 + ((double)speed / (10.0*Bact.dnalength(DNA)));
-        this.mutationRate = (1.0 + mutationFrequency)/(10*(mutationFrequency+Bact.dnalength(DNA)));
+        this.mutationRate = 0.0001 + (mutationFrequency)/(10*(mutationFrequency+Bact.dnalength(DNA)));
         this.metabolism = (int)Math.round( (DNA.length * 10)/(Bact.dnalength(DNA)) + this.mov_speed);
     }
     
@@ -383,9 +471,12 @@ public class Bact {
         int y = pos.getY();
         g.setColor(drawColor);
         g.fillOval(x+xoffset-drawSize/2, y+yoffset-drawSize/2, drawSize, drawSize);
-        g.setColor(Color.BLACK);
-        int linex = (int)Math.round(pos.getX()+drawSize*Math.cos(Math.PI*pos.getTheta()/180.0));
-        int liney = (int)Math.round(pos.getY()+drawSize*Math.sin(Math.PI*pos.getTheta()/180.0));
+        if (this.isAttacking())
+            g.setColor(Color.RED);
+        else
+            g.setColor(Color.BLACK);
+        int linex = (int)Math.round(pos.getX()+drawSize*pos.cos());
+        int liney = (int)Math.round(pos.getY()+drawSize*pos.sin());
         g.drawLine(x, y, linex, liney);
         //g.drawString(""+id, x-drawSize/2, y-drawSize/2);
     }
@@ -466,5 +557,14 @@ public class Bact {
     
     public NeuralNode[] getOutputs(){
         return new NeuralNode[]{leftWheel,rightWheel,mouthExtend,eatG,eatM,replicate};
+    }
+    public double getMutRate(){return this.mutationRate;}
+    public boolean isAttacking(){return this.mouthExtend.getState()>0;}
+    public int getSightRange(){return this.sightRange;}
+    public int getRed(){return red;}
+    public int getGreen(){return green;}
+    public int getBlue(){return blue;}
+    public BactInt[][] getClosests(){
+        return closests.clone();
     }
 }

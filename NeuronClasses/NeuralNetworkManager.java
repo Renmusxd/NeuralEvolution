@@ -78,12 +78,9 @@ public final class NeuralNetworkManager implements Updatable {
                 if (gene.getGene().length()==Bact.NPATH_LENGTH){
                     String n1 = gene.getGene().substring(0,4);
                     String n2 = gene.getGene().substring(4,8);
-                    String s_n1;
-                    String s_n2;
                     NeuralNode node1; NeuralNode node2;
                     if (nodeIDMap.containsKey(n1)){
                         node1 = nodeIDMap.get(n1);
-                        s_n1 = n1;
                     } else {
                         node1 = new NeuralNode();
                         this.registerNode(n1, node1);
@@ -92,12 +89,11 @@ public final class NeuralNetworkManager implements Updatable {
                         node2 = nodeIDMap.get(n2);
                         node1.addOutput(node2);
                         node2.addInput(node1);
-                        s_n2 = n2;
                     } else {
                         node2 = new NeuralNode();
+                        this.registerNode(n2, node2);
                         node1.addOutput(node2);
                         node2.addInput(node1);
-                        this.registerNode(n2, node2);
                     }
                 }
             }

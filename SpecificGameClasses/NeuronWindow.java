@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -101,8 +100,10 @@ public class NeuronWindow extends Canvas {
             } 
             if (poss!=null && selBact!=null) {
                 g.setColor(Color.BLACK);
-                g.drawString("Genes: "+selBact.getDNA().length, 0, 10);
-                g.drawString("DNA Hash:"+selBact.getDNA().toString().hashCode(), 0, 20);
+                g.drawString("Genes:  "+selBact.getDNA().length, 0, 10);
+                g.drawString("Parent: "+selBact.getParent(), 0, 20);
+                g.drawString("DNA Hash:"+Arrays.toString(selBact.getDNA()).hashCode(), 0, 30);
+                g.drawString("Mut Rate:"+selBact.getMutRate(), 0, 40);
                 Collection<NeuralNodeContainer> nncs = poss.values();
                 for (NeuralNodeContainer nnc : nncs){
                     nnc.draw(poss,g);
