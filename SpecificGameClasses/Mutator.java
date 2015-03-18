@@ -16,7 +16,7 @@ import java.util.Random;
  * @author Sumner
  */
 public class Mutator {
-    private final static Random r = new Random();
+    private final static Random r = new Random(System.nanoTime());
     
     public static Gene[] makeChild(Gene[] a, Gene[] b, double mutFreq){
         Gene[] newGenes = merge(a,b);

@@ -6,6 +6,7 @@ import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.SpecificGameClasses.Map;
 import NeuralEvolution.SpecificGameClasses.Mutator;
 import NeuralEvolution.SpecificGameClasses.NeuralThreader;
+import NeuralEvolution.SpecificGameClasses.ScoreTracker;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -51,10 +52,12 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         
         public static final int food_size = 10;
         private final int[][] grazingsquares;
-        public static final int default_grass = 100;
+        public static final int default_grass = 200;
         
         private final int[][] meatsquares;
     
+        ScoreTracker<Bact> longest = new ScoreTracker<>();
+        
 	public World(WorldController wc) {
             myWorldController = wc;
             myWorldController.getGameWindow().addKeyListener(this);
@@ -81,6 +84,8 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             for (int i = 0; i<grazingsquares.length; i++)
                 for (int j = 0; j<grazingsquares.length; j++)
                     grazingsquares[i][j] = default_grass;
+            // TODO add high scorers criteria
+            
 	}
         
         Incrementor leftText = new Incrementor(10,10);
@@ -206,7 +211,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
 	}
 
         /* The four record holding longest living bacts */
-        Bact[] longest = new Bact[2];
+//        Bact[] longest = new Bact[2];
 	@Override
 	public void update() {
             if (!paused){
@@ -255,16 +260,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                         bactDrawRemoveArray.add(b);
                     }
                     // Get some of the longest for repopulation
-                    for (int i = 0; i<longest.length; i++){
-                        if (longest[i]==null || b.getAge()>=longest[i].getAge()){
-                            // TODO fix
-                            for (int j = longest.length-1; j>i; j--){
-                                longest[j] = longest[j-1];
-                            }
-                            longest[i] = b;
-                            break;
-                        }
-                    }
+                    longest.checkScore(b);
                     
                 }
                 for (Bact b : bactRemoveArray){
@@ -279,18 +275,19 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                 this.bactAddArray.clear();
                 // Repopulate
                 repopulate();
-                if (selBact==null || !selBact.isAlive()){
-                    selBact=null;
-                    for (int i=0; i<longest.length; i++){
-                        if (longest[i]!=null){
-                            selBact=longest[i];
-                            break;
-                        }
-                    }
-                        
-                }
+                //if (selBact==null || !selBact.isAlive()){
+                //    selBact=null;
+                //    for (int i=0; i<longest.length; i++){
+                //        if (longest[i]!=null){
+                //            selBact=longest[i];
+                //            break;
+                //        }
+                //    }
+                //        
+                //}
             }
 	}
+        
         final int MUT_TIMES = 3;
         public void repopulate(){
             if (bactArray.size()<MIN_POP){
@@ -445,8 +442,6 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                 else if (arg0.getKeyChar()=='r'){
                     this.bactDrawRemoveArray.addAll(this.bactArray);
                     this.bactRemoveArray.addAll(this.bactArray);
-                    for (int i = 0; i<longest.length; i++)
-                        longest[i] = null;
                 }
 	}
 	@Override
