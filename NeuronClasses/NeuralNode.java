@@ -177,8 +177,8 @@ public class NeuralNode {
     public void setOperationString(String op){
         if (!editableOp)
             return;
-        if (op.length()==2){
-            switch (op){
+        if (op.length()==4){
+            switch (op.substring(2)){
                 case "AA":
                     in = INOP.OR; out = OUTOP.ALL; inverse = false;
                     break;

@@ -21,10 +21,11 @@ public class Bact {
      * TODO get sexual reproduction integrated, we'll start with asexual.
      */
     public static final String  ALPHABET            = "ABCD";
+    // TODO make fix gene length, eat extra
     public static final char    TRAIT_PRIMER        = 'A';
     public static final byte    TRAIT_LENGTH        = 8; // [XX][XXXX] = [OP]-[VAL]
     public static final char    NEURON_PRIMER       = 'B';
-    public static final byte    NEURON_LENGTH       = 6; // [XXXX][XX] = [ID]-[OP]
+    public static final byte    NEURON_LENGTH       = 8; // [XXXX][xxXX] = [ID]-[OP]
     public static final char    NPATH_PRIMER        = 'C';
     public static final byte    NPATH_LENGTH        = 8; // [XXXX][XXXX] = [ID]-[ID]
     public static final char    SPECIAL_PRIMER      = 'D';
@@ -103,6 +104,12 @@ public class Bact {
     
     private int lastThingSaid;
     private int agesaid;
+    
+    // Score Keeping
+    private int meat_eaten;
+    private int bacts_killed;
+    private boolean[][] blockmap;
+    private int blocks_explored;
     
     public Bact(World w, int x, int y, int theta, Gene[] g,int parent,int initialhunger){
         this(w, x,y,theta,g,parent);
@@ -187,8 +194,10 @@ public class Bact {
             nnm.registerInputNode(lastReplicate);
         // Now add stuff from DNA
         nnm.parseDNA(DNA);
+        
+        // Scorekeeping
+        blockmap = new boolean[w.getBlockWidth()][w.getBlockHeight()]; // All false
     }
-    
     
     public class BactInt{
         public Bact bact; public int dist2;
@@ -245,7 +254,9 @@ public class Bact {
                         if (mouthExtend.getState()>0 &&
                                 1+perp_dir==1 && 1-close_for_dir>=0){
                             System.out.println("Attacking!");
-                            b.inflictDamage(75);
+                            boolean killed = b.inflictDamage(100);
+                            if (killed)
+                                this.bacts_killed++;
                         }
                     }
                 }
@@ -294,11 +305,15 @@ public class Bact {
         }
     }
     
-    public void inflictDamage(int amount){
+    public boolean inflictDamage(int amount){
       // TODO damage
         health -= amount;
+        if (health<=0){
+            health = 0;
+            return true;
+        }
+        return false;
     }
-    
     
     private boolean mapupdated = false;
     public void updateNeurons(){
@@ -366,11 +381,12 @@ public class Bact {
             hunger += eaten;
             if (eaten!=0)
                 nnm.reward(eatMRewardAmount);
+            this.meat_eaten++;
         }
         if (hunger>MAX_HUNGER) hunger = MAX_HUNGER;
         // Hunger and Health
         this.hunger -= this.metabolism;
-        if (health<MAX_HEALTH) this.health += 1;
+        if (health<MAX_HEALTH && health>0) this.health += 1;
         
         // Set node states for next time
         hungerNode.setState(this.hunger);
@@ -391,6 +407,12 @@ public class Bact {
             w.replBact(id,replicate.getState(),pos.getX(),pos.getY(),newDNA);
             hunger -= MAX_HEALTH+replicate.getState();
         }
+        int[] blockpos = w.getBlockPos(pos.getX(), pos.getY());
+        if (!blockmap[blockpos[0]][blockpos[1]]){
+            blocks_explored++;
+            blockmap[blockpos[0]][blockpos[1]] = true;
+        }
+        
     }
     
     public boolean isAlive(){
@@ -444,7 +466,7 @@ public class Bact {
             
         }
         this.mov_speed = 1.0 + ((double)speed / (10.0*Bact.dnalength(DNA)));
-        this.mutationRate = 0.0001 + (mutationFrequency)/(10*(mutationFrequency+Bact.dnalength(DNA)));
+        this.mutationRate = 0.0001 + (mutationFrequency)/(mutationFrequency+Bact.dnalength(DNA));
         this.metabolism = (int)Math.round( (DNA.length * 10)/(Bact.dnalength(DNA)) + this.mov_speed);
     }
     
@@ -564,7 +586,10 @@ public class Bact {
     public int getRed(){return red;}
     public int getGreen(){return green;}
     public int getBlue(){return blue;}
-    public BactInt[][] getClosests(){
-        return closests.clone();
-    }
+    public BactInt[][] getClosests(){return closests.clone();}
+    
+    // Score Keeping
+    public int getKills(){return this.bacts_killed;}
+    public int getBlocksExplored(){return this.blocks_explored;}
+    public int getMeatEaten(){return this.meat_eaten;}
 }

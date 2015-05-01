@@ -7,6 +7,7 @@ import NeuralEvolution.SpecificGameClasses.Map;
 import NeuralEvolution.SpecificGameClasses.Mutator;
 import NeuralEvolution.SpecificGameClasses.NeuralThreader;
 import NeuralEvolution.SpecificGameClasses.ScoreTracker;
+import NeuralEvolution.SpecificGameClasses.Scorer;
 import NeuralEvolution.UtilityClasses.Movement;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -56,7 +57,7 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         
         private final int[][] meatsquares;
     
-        ScoreTracker<Bact> longest = new ScoreTracker<>();
+        ScoreTracker<Bact> longest;
         
 	public World(WorldController wc) {
             myWorldController = wc;
@@ -85,7 +86,23 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                 for (int j = 0; j<grazingsquares.length; j++)
                     grazingsquares[i][j] = default_grass;
             // TODO add high scorers criteria
-            
+            longest = new ScoreTracker<>();
+            Scorer lifespanScore = new Scorer<Bact>(){
+                public int getScore(Bact b) {return b.getAge();}
+            };
+            Scorer killScore = new Scorer<Bact>(){
+                public int getScore(Bact b) {return b.getKills() * b.getAge();}
+            };
+            Scorer exploreScore = new Scorer<Bact>(){
+                public int getScore(Bact b) {return b.getBlocksExplored();}
+            };
+            Scorer meatScore = new Scorer<Bact>(){
+                public int getScore(Bact b) {return b.getMeatEaten();}
+            };
+            longest.registerScore(lifespanScore);
+            longest.registerScore(killScore);
+            longest.registerScore(exploreScore);
+            longest.registerScore(meatScore);
 	}
         
         Incrementor leftText = new Incrementor(10,10);
@@ -110,7 +127,8 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                     }
             }
             
-            for (Bact b : longest){
+            for (Scorer<Bact> sb : longest){
+                Bact b = sb.top;
                 if (b!=null && b.isAlive()){
                     g.setColor(Color.YELLOW);
                     g.drawOval(b.getMov().getX()+view_Xoffset-10, b.getMov().getY()+view_Yoffset-10,20 ,20);
@@ -201,10 +219,11 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                     g.drawString("Speed:  "+(Math.floor((selBactAlias.getMovSpeed()*10))/10.0),0,leftText.getInc());
                     g.drawString("Sight:  "+selBactAlias.getSightRange(), 0,leftText.getInc());
                 }
-                for (Bact b : longest){
+                for (Scorer<Bact> sb : longest){
+                    Bact b = sb.top;
                     if (b!=null){
                         g.drawString("Id:  "+b.getID(), this.WindowWidth-70, rightText.getInc());
-                        g.drawString("Age: "+b.getAge(),this.WindowWidth-70, rightText.getInc());
+                        g.drawString("Score: "+sb.topscore,this.WindowWidth-70, rightText.getInc());
                     }
                 }
             }
@@ -292,7 +311,8 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
         public void repopulate(){
             if (bactArray.size()<MIN_POP){
                 int before = bactAddArray.size();
-                for (Bact b : longest){
+                for (Scorer<Bact> sb : longest){
+                    Bact b = sb.top;
                     if (b!=null) {
                         int b1x = r.nextInt(XBOUND-40)+20;
                         int b1y = r.nextInt(YBOUND-40)+20;
@@ -302,10 +322,17 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
                         Bact newb1 = new Bact(this,b1x,b1y,r.nextInt(360),newGenes,b.getID());
                         Bact newb2 = new Bact(this,b2x,b2y,r.nextInt(360),newGenes,b.getID());
                         this.addBact(newb1);this.addBact(newb2);
+                        
                         for (int i = 0; i<MUT_TIMES; i++){
-                            Gene[] mutnewGenes = Mutator.swap(newGenes, 0.1/newGenes.length);
-                            mutnewGenes = Mutator.changeBase(mutnewGenes, 0.1/Bact.dnalength(newGenes));
-
+                            Gene[] mutnewGenes = Mutator.swap(newGenes, 1/newGenes.length);
+                            mutnewGenes = Mutator.changeBase(mutnewGenes, 1/Bact.dnalength(newGenes));
+                            //for (Gene g : newGenes)
+                            //    System.out.print(g.getPrimer()+g.getGene()+",");
+                            //System.out.println("");
+                            //for (Gene g : mutnewGenes)
+                            //    System.out.print(g.getPrimer()+g.getGene()+",");
+                            //System.out.println("");
+                            
                             int b3x = r.nextInt(XBOUND-40)+20;
                             int b3y = r.nextInt(YBOUND-40)+20;
                             int b4x = b3x + r.nextInt(40)-20;
@@ -401,6 +428,22 @@ public final class World implements Updatable, Drawable, KeyListener, MouseListe
             Bact b = new Bact(this,x+r.nextInt(40)-20,y+r.nextInt(40)-20,
                     r.nextInt(360),dna,id,starthung);
             this.addBact(b);
+        }
+        
+        public int[] getBlockPos(int x, int y){
+            int x_pos = x/food_size;
+            int y_pos = y/food_size;
+            x_pos = (x_pos<0)?0:x_pos;
+            x_pos = (x_pos>=XBOUND/food_size)?XBOUND/food_size -1:x_pos;
+            y_pos = (y_pos<0)?0:y_pos;
+            y_pos = (y_pos>=XBOUND/food_size)?XBOUND/food_size -1:x_pos;
+            return new int[]{x_pos,y_pos};
+        }
+        public int getBlockWidth() {
+            return XBOUND/food_size;
+        }
+        public int getBlockHeight() {
+            return YBOUND/food_size;
         }
         
 	// -------------------------------------------------------------------- KEYBOARD, COMPONENT, AND MOUSE EVENTS -------------------------------------------------

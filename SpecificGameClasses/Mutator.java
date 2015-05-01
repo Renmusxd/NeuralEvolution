@@ -16,8 +16,7 @@ import java.util.Random;
  * @author Sumner
  */
 public class Mutator {
-    private final static Random r = new Random(System.nanoTime());
-    
+    private static final Random r = new Random();
     public static Gene[] makeChild(Gene[] a, Gene[] b, double mutFreq){
         Gene[] newGenes = merge(a,b);
         newGenes = swap(newGenes,mutFreq);
@@ -95,7 +94,7 @@ public class Mutator {
     public static Gene[] changeBase(Gene[] a, double mutFreq){
         StringBuilder s = new StringBuilder();
         for (Gene g : a)
-            s.append(g.getGene());
+            s.append(g.getPrimer()).append(g.getGene());
         char[] newDNA = s.toString().toCharArray();
         // Make changes
         double continueFreq = 

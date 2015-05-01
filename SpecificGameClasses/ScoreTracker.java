@@ -15,7 +15,7 @@ import java.util.Iterator;
  * @author Sumner
  * @param <T> Type of object scores of which will be tracked
  */
-public class ScoreTracker<T> implements Iterable<T> {
+public class ScoreTracker<T> implements Iterable<Scorer<T>> {
     public ArrayList<Scorer<T>> scores = new ArrayList<>();
 
     public void registerScore(Scorer s){
@@ -48,13 +48,13 @@ public class ScoreTracker<T> implements Iterable<T> {
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return new Iterator<T>(){
+    public Iterator<Scorer<T>> iterator() {
+        return new Iterator<Scorer<T>>(){
             int index = 0;
             @Override
             public boolean hasNext() {return index<scores.size()-1;}
             @Override
-            public T next() {return scores.get(index++).top;}
+            public Scorer<T> next() {return scores.get(index++);}
         };
     }
     
