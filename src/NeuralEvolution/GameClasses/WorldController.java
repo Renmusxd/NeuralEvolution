@@ -128,8 +128,8 @@ public class WorldController { // A multithread compatible update and graphics l
 	
 	public void render(){
 		myGameWindow.drawWindow(); // gets graphics then calls drawAll // for now only window
-                // Added
-                this.myWorkhorse.nw.drawWindow();
+		// Added
+		this.myWorkhorse.nw.drawWindow();
 	}
 	public void drawAll(Graphics2D g){
 		drawObjects.addAll(addToDrawObjects);
