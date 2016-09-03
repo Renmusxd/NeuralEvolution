@@ -1,8 +1,10 @@
 package NeuralEvolution.BodyClasses;
 
 import NeuralEvolution.GameClasses.World;
-import NeuralEvolution.NeuronClasses.NeuralNetworkManager;
-import NeuralEvolution.NeuronClasses.NeuralNode;
+import NeuralEvolution.NeuronClasses.BactBrain;
+import NeuralEvolution.NeuronClasses.BrainNode;
+import NeuralEvolution.NeuronClasses.NeuralTree.NeuralTreeManager;
+import NeuralEvolution.NeuronClasses.NeuralTree.NeuralTreeNode;
 import NeuralEvolution.SpecificGameClasses.Gene;
 import NeuralEvolution.SpecificGameClasses.Mutator;
 import NeuralEvolution.UtilityClasses.Movement;
@@ -47,7 +49,7 @@ public class Bact {
     
     private Gene[] DNA;
     
-    private NeuralNetworkManager nnm;
+    private BactBrain brain;
     //Traits
     private int mutationFrequency,
                 speed,
@@ -79,7 +81,7 @@ public class Bact {
     private int age = 0;
     
     // Nodes to listen to.
-    private NeuralNode  leftWheel,
+    private BrainNode  leftWheel,
                         rightWheel,
                         mouthExtend,
                         eatG,
@@ -91,9 +93,9 @@ public class Bact {
     // 2,1 is in front and to the right
     //...
     private final BactInt[][] closests = new BactInt[3][3];
-    private NeuralNode[][][] sight; // [0->red 1->green 2->blue][x][y]
-    private NeuralNode[][] touch;
-    private NeuralNode  hungerNode,
+    private BrainNode[][][] sight; // [0->red 1->green 2->blue][x][y]
+    private BrainNode[][]  touch;
+    private BrainNode   hungerNode,
                         healthNode,
                         lastLWheel,
                         lastRWheel,
@@ -124,76 +126,76 @@ public class Bact {
         this.DNA = DNA;
         this.w = w;
         this.parseDNA(DNA);
-        nnm = new NeuralNetworkManager(this);
+        brain = new NeuralTreeManager(this);
         pos = new Movement(x,y,theta);
         
         hunger = MAX_HUNGER;
         health = MAX_HEALTH;
         
         // Now add nodes for motion and stuff
-            leftWheel = new NeuralNode("LW",true,false);
-            rightWheel = new NeuralNode("RW",true,false);
-            mouthExtend = new NeuralNode("M",true,false);
-            eatG = new NeuralNode("Eg",true,false);
-            eatM = new NeuralNode("Em",true,false);
-            replicate = new NeuralNode("R",true,false);
+            leftWheel = new NeuralTreeNode("LW",true,false);
+            rightWheel = new NeuralTreeNode("RW",true,false);
+            mouthExtend = new NeuralTreeNode("M",true,false);
+            eatG = new NeuralTreeNode("Eg",true,false);
+            eatM = new NeuralTreeNode("Em",true,false);
+            replicate = new NeuralTreeNode("R",true,false);
 
-            nnm.registerNode(leftWheel);
-            nnm.registerNode(rightWheel);
-            nnm.registerNode(mouthExtend);
-            nnm.registerNode(eatG);
-            nnm.registerNode(eatM);
-            nnm.registerNode(replicate);
+            brain.registerNode(leftWheel);
+            brain.registerNode(rightWheel);
+            brain.registerNode(mouthExtend);
+            brain.registerNode(eatG);
+            brain.registerNode(eatM);
+            brain.registerNode(replicate);
         
         // Add input nodes
             // Always on
-            NeuralNode on = new NeuralNode("On",1);
-            NeuralNode maxhung = new NeuralNode("MHu",MAX_HUNGER);
-            NeuralNode maxhealth = new NeuralNode("MHe",MAX_HEALTH);
-            nnm.registerInputNode(on);
-            nnm.registerInputNode(maxhung);
-            nnm.registerInputNode(maxhealth);
+            NeuralTreeNode on = new NeuralTreeNode("On",1);
+            NeuralTreeNode maxhung = new NeuralTreeNode("MHu",MAX_HUNGER);
+            NeuralTreeNode maxhealth = new NeuralTreeNode("MHe",MAX_HEALTH);
+            brain.registerInputNode(on);
+            brain.registerInputNode(maxhung);
+            brain.registerInputNode(maxhealth);
             // Sight
-            sight = new NeuralNode[3][3][3];
+            sight = new NeuralTreeNode[3][3][3];
             char[] cs = "RGB".toCharArray();
             for (int c=0; c<3; c++){
                 for (int i=0; i<3; i++){
                     for (int j=0; j<3; j++) {
-                        NeuralNode n = new NeuralNode("I"+cs[c]+""+i+""+j,false);
+                        NeuralTreeNode n = new NeuralTreeNode("I"+cs[c]+""+i+""+j,false);
                         sight[c][i][j] = n;
-                        nnm.registerInputNode(n);
+                        brain.registerInputNode(n);
                     }
                 }
             }
             // Tactile
-            touch = new NeuralNode[3][3];
+            touch = new NeuralTreeNode[3][3];
             for (int i=0; i<3; i++){
                 for (int j=0; j<3; j++) {
-                    NeuralNode n = new NeuralNode("T"+i+""+j,false);
+                    NeuralTreeNode n = new NeuralTreeNode("T"+i+""+j,false);
                     touch[i][j] = n;
-                    nnm.registerInputNode(n);
+                    brain.registerInputNode(n);
                 }
             }
             // Hunger and Health
-            hungerNode = new NeuralNode("Hunger",false,false);
-            healthNode = new NeuralNode("Health",false,false);
-            nnm.registerInputNode(hungerNode);
-            nnm.registerInputNode(healthNode);
+            hungerNode = new NeuralTreeNode("Hunger",false,false);
+            healthNode = new NeuralTreeNode("Health",false,false);
+            brain.registerInputNode(hungerNode);
+            brain.registerInputNode(healthNode);
             // Past output
-            lastLWheel = new NeuralNode("LastLW",false,false);
-            lastRWheel = new NeuralNode("LastRW",false,false);
-            lastMouthX = new NeuralNode("LastMX",false,false);
-            lastEatG = new NeuralNode("LastEatG",false,false);
-            lastEatM = new NeuralNode("LastEatM",false,false);
-            lastReplicate = new NeuralNode("LastRepl",false,false);
-            nnm.registerInputNode(lastLWheel);
-            nnm.registerInputNode(lastRWheel);
-            nnm.registerInputNode(lastMouthX);
-            nnm.registerInputNode(lastEatG);
-            nnm.registerInputNode(lastEatM);
-            nnm.registerInputNode(lastReplicate);
+            lastLWheel = new NeuralTreeNode("LastLW",false,false);
+            lastRWheel = new NeuralTreeNode("LastRW",false,false);
+            lastMouthX = new NeuralTreeNode("LastMX",false,false);
+            lastEatG = new NeuralTreeNode("LastEatG",false,false);
+            lastEatM = new NeuralTreeNode("LastEatM",false,false);
+            lastReplicate = new NeuralTreeNode("LastRepl",false,false);
+            brain.registerInputNode(lastLWheel);
+            brain.registerInputNode(lastRWheel);
+            brain.registerInputNode(lastMouthX);
+            brain.registerInputNode(lastEatG);
+            brain.registerInputNode(lastEatM);
+            brain.registerInputNode(lastReplicate);
         // Now add stuff from DNA
-        nnm.parseDNA(DNA);
+        brain.parseDNA(DNA);
         
         // Scorekeeping
         blockmap = new boolean[w.getBlockWidth()][w.getBlockHeight()]; // All false
@@ -318,7 +320,7 @@ public class Bact {
     private boolean mapupdated = false;
     public void updateNeurons(){
         if (!mapupdated){
-            nnm.update();
+            brain.update();
             mapupdated = true;
         }
     }
@@ -330,7 +332,7 @@ public class Bact {
         age++;
         // Check what the neural network is up to if it hasn't been done
         if (!mapupdated){
-            nnm.update();
+            brain.update();
         } else {
             mapupdated = false;
         }     
@@ -373,14 +375,14 @@ public class Bact {
             int eaten = w.eatGrass(pos.getX(), pos.getY(), toeat);
             hunger += eaten;
             if (eaten!=0)
-                nnm.reward(eatGRewardAmount);
+                brain.reward(eatGRewardAmount);
         }
         if (eatMState>0){
             int toeat = Math.min(eatGState, MAX_HUNGER-hunger);
             int eaten = w.eatMeat(pos.getX(), pos.getY(), toeat);
             hunger += eaten;
             if (eaten!=0)
-                nnm.reward(eatMRewardAmount);
+                brain.reward(eatMRewardAmount);
             this.meat_eaten++;
         }
         if (hunger>MAX_HUNGER) hunger = MAX_HUNGER;
@@ -568,7 +570,7 @@ public class Bact {
     public int getAge(){return age;}
     @Override
     public String toString(){
-        return "Bact: "+nnm.toString();
+        return "Bact: "+ brain.toString();
     }
     public int getHunger(){return hunger;}
     public int getHealth(){return health;}
@@ -577,8 +579,8 @@ public class Bact {
     public int getID(){return id;}
     public int getParent(){return parent;}
     
-    public NeuralNode[] getOutputs(){
-        return new NeuralNode[]{leftWheel,rightWheel,mouthExtend,eatG,eatM,replicate};
+    public BrainNode[] getOutputs(){
+        return new BrainNode[]{leftWheel,rightWheel,mouthExtend,eatG,eatM,replicate};
     }
     public double getMutRate(){return this.mutationRate;}
     public boolean isAttacking(){return this.mouthExtend.getState()>0;}

@@ -1,7 +1,8 @@
-package NeuralEvolution.NeuronClasses;
+package NeuralEvolution.NeuronClasses.NeuralTree;
 
 import NeuralEvolution.BodyClasses.Bact;
-import NeuralEvolution.GameClasses.Updatable;
+import NeuralEvolution.NeuronClasses.BactBrain;
+import NeuralEvolution.NeuronClasses.BrainNode;
 import NeuralEvolution.SpecificGameClasses.Gene;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,42 +11,42 @@ import java.util.HashMap;
  * Requires Node ID Lengths of 4 for automatic placement.
  * @author Sumner
  */
-public final class NeuralNetworkManager implements Updatable {
+public final class NeuralTreeManager implements BactBrain {
 
     private String ID_LOW = "AAAA";
     
-    private final ArrayList<NeuralNode> inputNodes;
-    private final HashMap<String,NeuralNode> nodeIDMap;
+    private final ArrayList<BrainNode> inputNodes;
+    private final HashMap<String,BrainNode> nodeIDMap;
     
-    public NeuralNetworkManager(Bact b){
+    public NeuralTreeManager(Bact b){
         nodeIDMap = new HashMap<>();
         inputNodes = new ArrayList<>();
     }
     
-    public NeuralNetworkManager(Bact b, Gene[] DNA){
+    public NeuralTreeManager(Bact b, Gene[] DNA){
         this(b);
         this.parseDNA(DNA);
     }
     
     @Override
     public void update(){
-        for (NeuralNode n : nodeIDMap.values())
+        for (BrainNode n : nodeIDMap.values())
             n.clear();
-        for (NeuralNode n : inputNodes)
+        for (BrainNode n : inputNodes)
             n.updateOutputs();
     }
     
-    public void registerInputNode(NeuralNode n){
+    public void registerInputNode(BrainNode n){
         registerNode(n);
         inputNodes.add(n);
     }
     
-    public void registerNode(NeuralNode n){
+    public void registerNode(BrainNode n){
         registerNode(ID_LOW, n);
         incrementID();
     }
     
-    public void registerNode(String s, NeuralNode n){
+    public void registerNode(String s, BrainNode n){
         nodeIDMap.put(s, n);
         n.setIDWeak(s);
     }
@@ -68,7 +69,7 @@ public final class NeuralNetworkManager implements Updatable {
                     if (nodeIDMap.containsKey(n)){
                         nodeIDMap.get(n).setOperationString(op);
                     } else {
-                        NeuralNode node = new NeuralNode();
+                        NeuralTreeNode node = new NeuralTreeNode();
                         node.setOperationString(op);
                         this.registerNode(n, node);
                     }
@@ -78,11 +79,11 @@ public final class NeuralNetworkManager implements Updatable {
                 if (gene.getGene().length()==Bact.NPATH_LENGTH){
                     String n1 = gene.getGene().substring(0,4);
                     String n2 = gene.getGene().substring(4,8);
-                    NeuralNode node1; NeuralNode node2;
+                    BrainNode node1; BrainNode node2;
                     if (nodeIDMap.containsKey(n1)){
                         node1 = nodeIDMap.get(n1);
                     } else {
-                        node1 = new NeuralNode();
+                        node1 = new NeuralTreeNode();
                         this.registerNode(n1, node1);
                     }
                     if (nodeIDMap.containsKey(n2)){
@@ -90,7 +91,7 @@ public final class NeuralNetworkManager implements Updatable {
                         node1.addOutput(node2);
                         node2.addInput(node1);
                     } else {
-                        node2 = new NeuralNode();
+                        node2 = new NeuralTreeNode();
                         this.registerNode(n2, node2);
                         node1.addOutput(node2);
                         node2.addInput(node1);
@@ -125,7 +126,7 @@ public final class NeuralNetworkManager implements Updatable {
     @Override
     public String toString(){
         String s = "NNetMan:\n";
-        for (NeuralNode n : nodeIDMap.values()){
+        for (BrainNode n : nodeIDMap.values()){
             s+=n.toString()+"\n";
         }
         return s;

@@ -3,7 +3,8 @@ package NeuralEvolution.SpecificGameClasses;
 import NeuralEvolution.BodyClasses.Bact;
 import NeuralEvolution.GameClasses.Workhorse;
 import NeuralEvolution.GameClasses.World;
-import NeuralEvolution.NeuronClasses.NeuralNode;
+import NeuralEvolution.NeuronClasses.BrainNode;
+import NeuralEvolution.NeuronClasses.BrainNode;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -14,8 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  *
@@ -34,7 +34,7 @@ public class NeuronWindow extends Canvas {
     
     public NeuronWindow(Workhorse wh){
         JFrame myFrame = new JFrame("Neurons");
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JPanel myPanel = (JPanel) myFrame.getContentPane();
         myPanel.setPreferredSize(new Dimension(500,500));
         myPanel.setLayout(null);
@@ -50,8 +50,8 @@ public class NeuronWindow extends Canvas {
         this.wh = wh;
     }
     
-    HashMap<NeuralNode,NeuralNodeContainer> poss = null;
-    Bact lastSelBact;
+    private HashMap<BrainNode,BrainNodeContainer> poss = null;
+    private Bact lastSelBact;
     public void drawWindow(){
         Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
         World myWorld = wh.getWorldController().getWorld();
@@ -63,10 +63,10 @@ public class NeuronWindow extends Canvas {
             g.drawString("No selected Bact", 0, 10);
         } else if (poss==null || !selBact.equals(lastSelBact)){
             poss = new HashMap<>();
-            NeuralNode[] outputs = selBact.getOutputs();
-            HashSet<NeuralNode> seen = new HashSet<>();
-            ArrayList<NeuralNode> next = new ArrayList<>(Arrays.asList(outputs));
-            ArrayList<NeuralNode> nextnext = new ArrayList<>();
+            BrainNode[] outputs = selBact.getOutputs();
+            HashSet<BrainNode> seen = new HashSet<>();
+            ArrayList<BrainNode> next = new ArrayList<>(Arrays.asList(outputs));
+            ArrayList<BrainNode> nextnext = new ArrayList<>();
             int x_pos;
             int y_pos = this.getHeight()-40;
             boolean first = true;
@@ -74,12 +74,12 @@ public class NeuronWindow extends Canvas {
                 int spacing = (this.getWidth()-40) / next.size();
                 x_pos = 20;
                 y_pos -= 40;
-                for (NeuralNode n : next){
+                for (BrainNode n : next){
                     if (seen.contains(n))
                         continue;
                     if (n.getInputs().isEmpty() && first)
                         continue;
-                    NeuralNodeContainer nnc = new NeuralNodeContainer(n,x_pos,y_pos,first);
+                    BrainNodeContainer nnc = new BrainNodeContainer(n,x_pos,y_pos,first);
                     poss.put(n,nnc);
                     x_pos += spacing;
                     if (n.getAcceptsInput()){
@@ -100,8 +100,8 @@ public class NeuronWindow extends Canvas {
             g.drawString("Parent: "+selBact.getParent(), 0, 20);
             g.drawString("DNA Hash:"+Arrays.toString(selBact.getDNA()).hashCode(), 0, 30);
             g.drawString("Mut Rate:"+selBact.getMutRate(), 0, 40);
-            Collection<NeuralNodeContainer> nncs = poss.values();
-            for (NeuralNodeContainer nnc : nncs){
+            Collection<BrainNodeContainer> nncs = poss.values();
+            for (BrainNodeContainer nnc : nncs){
                 nnc.draw(poss,g);
             }
         }
@@ -110,40 +110,35 @@ public class NeuronWindow extends Canvas {
         g.dispose(); strategy.show();
     }
     
-    public class NeuralNodeContainer{
-        public ArrayList<NeuralNode> nns = new ArrayList<>();
-        NeuralNode n;
+    private class BrainNodeContainer{
+        ArrayList<BrainNode> nns = new ArrayList<>();
+        BrainNode n;
         int x,y;
         boolean first;
-        public NeuralNodeContainer(NeuralNode n, int x, int y, boolean first){
+        BrainNodeContainer(BrainNode n, int x, int y, boolean first){
             this.n = n;
             this.x = x; this.y = y;
             this.first = first;
         }
-        public void addInput(NeuralNode nnc){
+        public void addInput(BrainNode nnc){
             nns.add(nnc);
         }
-        public void draw(HashMap<NeuralNode,NeuralNodeContainer> nncs, Graphics2D g){
-            if (n.getState()==0){
-                if (first)
-                    g.setColor(maroon);
-                else if (n.getAcceptsInput())
-                    g.setColor(darkgreen);
-                else
-                    g.setColor(darkblue);
-            }else{
-                if (first)
-                    g.setColor(red);
-                else if (n.getAcceptsInput())
-                    g.setColor(green);
-                else
-                    g.setColor(blue);
-            }
-            for (NeuralNode n : nns){
-                NeuralNodeContainer o_n = nncs.get(n);
+        void draw(HashMap<BrainNode, BrainNodeContainer> nncs, Graphics2D g){
+            Color a;
+            Color b;
+            Color c;
+
+            if (n.getState()==0){a = maroon; b = darkgreen; c = darkblue;}
+            else {a = red; b = green; c = blue;}
+
+            if (first) {g.setColor(a);}
+            else if (n.getAcceptsInput()) {g.setColor(b);}
+            else {g.setColor(c);}
+
+            for (BrainNode n : nns){
+                BrainNodeContainer o_n = nncs.get(n);
                 int mid_x = (o_n.x - x)/2 + x;
                 int mid_y = (o_n.y - y)/2 + y;
-
                 g.drawLine(x+10, y+10, o_n.x+10, o_n.y+10);
             }
             g.fillOval(x, y, 20, 20);

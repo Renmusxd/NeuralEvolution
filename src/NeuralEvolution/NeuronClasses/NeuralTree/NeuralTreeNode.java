@@ -1,15 +1,17 @@
-package NeuralEvolution.NeuronClasses;
+package NeuralEvolution.NeuronClasses.NeuralTree;
+
+import NeuralEvolution.NeuronClasses.BrainNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
 /**
- * The NeuralNode class controls the actions of nodes
+ * The NeuralTreeNode class controls the actions of nodes
  * in the Bact's neural network.
  * @author Sumner
  */
-public class NeuralNode {
+public class NeuralTreeNode implements BrainNode {
     private String id = null;
     private static final Random rand = new Random();
     
@@ -28,11 +30,11 @@ public class NeuralNode {
     private int state = 0;
     int lastState = 0;
     
-    private final ArrayList<NeuralNode> inputNodes;
-    private final ArrayList<NeuralNode> outputNodes;
+    private final ArrayList<BrainNode> inputNodes;
+    private final ArrayList<BrainNode> outputNodes;
     
     int totalValue = 0; // Add one for new input, add one for learning
-    private final HashMap<NeuralNode,Integer> outWeights;
+    private final HashMap<BrainNode,Integer> outWeights;
     
     /** Number of updates this cycle, limited to #inputs **/
     private byte updates;
@@ -44,30 +46,30 @@ public class NeuralNode {
      * @param s
      * @param v constant value
      */
-    public NeuralNode(String s, int v){
+    public NeuralTreeNode(String s, int v){
         this(s,false,false);
         this.state = v;
     }
-    public NeuralNode(String s, boolean acceptsInput, boolean editableoperation){
+    public NeuralTreeNode(String s, boolean acceptsInput, boolean editableoperation){
         this();
         id = s;
         this.acceptsInput = acceptsInput;
         editableOp = false;
     }
-    public NeuralNode(String s, boolean acceptsInput){
+    public NeuralTreeNode(String s, boolean acceptsInput){
         this();
         id = s;
         this.acceptsInput = acceptsInput;
     }
-    public NeuralNode(){
+    public NeuralTreeNode(){
         inputNodes = new ArrayList<>();
         outputNodes = new ArrayList<>();
         outWeights = new HashMap<>();
     }
-    public void addInput(NeuralNode nn){
+    public void addInput(BrainNode nn){
         inputNodes.add(nn);
     }
-    public void addOutput(NeuralNode nn){
+    public void addOutput(BrainNode nn){
         outputNodes.add(nn);
         outWeights.put(nn,1);
         totalValue++;
@@ -89,7 +91,7 @@ public class NeuralNode {
             int newstate = 0;
             if (in == INOP.AND && inputNodes.size()>0){ // Largest if all on
                 newstate = inputNodes.get(0).getState();
-                for (NeuralNode n : inputNodes){
+                for (BrainNode n : inputNodes){
                     int t = n.getState();
                     if (t==0){
                         newstate = 0;
@@ -99,7 +101,7 @@ public class NeuralNode {
                     } 
                 }
             } else if (in == INOP.OR){
-                for (NeuralNode n : inputNodes){
+                for (BrainNode n : inputNodes){
                     if (n.getState()>newstate){
                         newstate = n.getState();
                     }
@@ -107,18 +109,18 @@ public class NeuralNode {
             } else if (in == INOP.EQ && inputNodes.size()>0){ // All equal
                 newstate = 1;
                 int v = this.inputNodes.get(0).getState();
-                for (NeuralNode n : inputNodes)
+                for (BrainNode n : inputNodes)
                     if (n.getState()!=v){newstate=0;break;}
             } else if (in == INOP.LT && inputNodes.size()>0){ // In ascending order
                 newstate = 1;
                 int v = this.inputNodes.get(0).getState()-1; // So first checks out
-                for (NeuralNode n : inputNodes)
+                for (BrainNode n : inputNodes)
                     if (n.getState()<=v){newstate=0;break;}
                     else {v = n.getState();}
             } else if (in == INOP.DLATCH && inputNodes.size()>0){ // Or if active, else hold
                 boolean isActive = (inputNodes.get(0).getState()!=0);
                 if (isActive){
-                    for (NeuralNode n : inputNodes.subList(1,inputNodes.size())){
+                    for (BrainNode n : inputNodes.subList(1,inputNodes.size())){
                         if (n.getState()>newstate){
                             newstate = n.getState();
                         }
@@ -127,7 +129,7 @@ public class NeuralNode {
                     newstate = lastState;
                 }
             } else if (in == INOP.ADD){ // sum
-                for (NeuralNode n : inputNodes)
+                for (BrainNode n : inputNodes)
                     newstate += n.getState();
             }
             this.setState(newstate);
@@ -142,12 +144,12 @@ public class NeuralNode {
     public void updateOutputs(){
         if (outputNodes.size()>0 && state!=lastState){
             if (out == OUTOP.ALL){
-                for (NeuralNode n : outputNodes) {
+                for (BrainNode n : outputNodes) {
                     n.update();
                 }
             } else if (out == OUTOP.ONE){
                 int r = rand.nextInt(totalValue);
-                for (NeuralNode n : outputNodes){
+                for (BrainNode n : outputNodes){
                     r -= outWeights.get(n);
                     if (r<=0) {
                         n.update();
@@ -155,7 +157,7 @@ public class NeuralNode {
                     }
                 }
             } else if (out == OUTOP.ANY){
-                for (NeuralNode n : outputNodes){
+                for (BrainNode n : outputNodes){
                     if (rand.nextDouble()<(outWeights.get(n)/(double)totalValue)){
                         n.update();
                     }
@@ -282,17 +284,17 @@ public class NeuralNode {
     public boolean getAcceptsInput(){
         return this.acceptsInput;
     }
-    public ArrayList<NeuralNode> getInputs(){
+    public ArrayList<BrainNode> getInputs(){
         return this.inputNodes;
     }
-    public ArrayList<NeuralNode> getOutputs(){
+    public ArrayList<BrainNode> getOutputs(){
         return this.outputNodes;
     }
     
     @Override
     public String toString(){
         String s = id + "\t["+in.name()+", "+out.name()+", "+inverse+"]";
-        for (NeuralNode n : outputNodes){
+        for (BrainNode n : outputNodes){
             s+="\n-->"+n.getID();
         }
         return s;
